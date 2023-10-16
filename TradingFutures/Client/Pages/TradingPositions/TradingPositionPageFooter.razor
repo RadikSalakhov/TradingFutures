@@ -1,0 +1,127 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Data;
+@using TradingFutures.Shared.Entities;
+@using TradingFutures.Shared;
+@using TradingFutures.Shared.Utils;
+
+@implements IDisposable
+
+@inject IClientSettingsService ClientSettings
+@inject ICacheService ClientCache
+@inject ITradingClientService TradingClient
+
+<div class="ts-container">
+    <div class="@getItemClass("is-short-mode")">
+        @CurrentPrefix
+    </div>
+    @if (TradingPosition.HasCoins())
+    {
+        <div class="@getItemClass("coins")">
+            @CommonUtilities.ToDefaultString(TradingPosition.GetCoins())
+        </div>
+        <div class="@getItemClass("current-usdt")">
+            @CommonUtilities.ToCurrencyString(TradingPosition.GetCurrentUSDT())
+        </div>
+        <div class="@getItemClass("pnl")">
+            @CommonUtilities.ToCurrencyString(getCurrentPnl(), decimals: 2, includeSign: true)
+        </div>
+        <div class="@getItemClass("pnl-percent")">
+            @CommonUtilities.ToPercentageString(getCurrentPnlCoeff(), decimals: 2, includeSign: true)
+        </div>
+    }
+    else if (TradingPosition.LastTransactionPrice.HasValue)
+    {
+        <div class="@getItemClass("last-transaction-price")">
+            @CommonUtilities.ToCurrencyString(TradingPosition.LastTransactionPrice.Value)
+        </div>
+        <div class="@getItemClass("last-transaction-price-coeff")">
+            @CommonUtilities.ToPercentageString(TradingPosition.GetLastTransactionPriceCoeff(), decimals: 2, includeSign: true)
+        </div>
+    }
+    else
+    {
+        <div class="@getItemClass("last-transaction-price")">
+            ---
+        </div>
+        <div class="@getItemClass("last-transaction-price-coeff")">
+            ---
+        </div>
+    }
+
+</div>
+
+@code {
+    [Parameter]
+    public string Asset { get; set; } = string.Empty;
+
+    private ServerSettingsEntity ServerSettings => ClientCache.ServerSettings.Get();
+
+    private TradingOrderSide TradingOrderSide => ClientSettings.IsShortMode.GetTradingOrderSide();
+
+    private TradingPositionEntity TradingPosition => ClientCache.TradingPosition.GetTradingPositionOrDefault(TradingOrderSide, Asset);
+
+    private string CurrentPrefix => TradingPosition.IsLongPosition() ? "L" : TradingPosition.IsShortPosition() ? "S" : string.Empty;
+
+    private decimal LastPrice => TradingPosition.LastPrice;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ClientSettings.Updated += clientSettings_Updated;
+
+        ClientCache.TradingPosition.Updated += tradingPosition_Updated;
+    }
+
+    public void Dispose()
+    {
+        ClientSettings.Updated -= clientSettings_Updated;
+
+        ClientCache.TradingPosition.Updated -= tradingPosition_Updated;
+    }
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task tradingPosition_Updated(IEnumerable<TradingPositionEntity> tradingPositionEntities)
+    {
+        if (tradingPositionEntities != null && tradingPositionEntities.Any(v => v.Asset == Asset))
+            await InvokeAsync(StateHasChanged);
+    }        
+
+    private string getItemClass(string name)
+    {
+        var extraClass = getExtraClass();
+
+        return $"ts-item ts-item-{name} {extraClass}";
+    }
+
+    private string getExtraClass()
+    {
+        if (!TradingPosition.HasCoins())
+            return "ts-background-color-zero";
+
+        return TradingPosition.IsPnlThreasholdReached(ServerSettings.MinPnl)
+            ? "ts-background-color-plus"
+            : "ts-background-color-minus";
+    }    
+
+    private decimal getCurrentPnl()
+    {
+        if (ClientSettings.SortMode.Value == SortMode.PNL_NORMALIZED)
+            return TradingPosition.GetPnlOverStepsAmount();
+        else
+            return TradingPosition.GetPnl();
+    }
+
+    private decimal getCurrentPnlCoeff()
+    {
+        if (ClientSettings.SortMode.Value == SortMode.PNL_NORMALIZED)
+            return TradingPosition.GetPnlCoeffOverStepsAmount();
+        else
+            return TradingPosition.GetPnlCoeff();
+    }
+}

@@ -1,0 +1,134 @@
+{
+  "ContractOptions": [
+    {
+      "Asset": "ADA",
+      "ContractSize": 10,
+      "VolumeStep": 32
+    },
+    {
+      "Asset": "APT",
+      "ContractSize": 0.1,
+      "VolumeStep": 140
+    },
+    {
+      "Asset": "ARB",
+      "ContractSize": 1,
+      "VolumeStep": 90
+    },
+    {
+      "Asset": "ATOM",
+      "ContractSize": 1,
+      "VolumeStep": 12
+    },
+    {
+      "Asset": "AVAX",
+      "ContractSize": 1,
+      "VolumeStep": 8
+    },
+	{
+      "Asset": "BCH",
+      "ContractSize": 0.01,
+      "VolumeStep": 40
+    },
+    {
+      "Asset": "BNB",
+      "ContractSize": 0.1,
+      "VolumeStep": 4
+    },
+    {
+      "Asset": "BTC",
+      "ContractSize": 0.001,
+      "VolumeStep": 4
+    },
+    {
+      "Asset": "CFX",
+      "ContractSize": 1,
+      "VolumeStep": 600
+    },
+    {
+      "Asset": "DOGE",
+      "ContractSize": 100,
+      "VolumeStep": 14
+    },
+    {
+      "Asset": "DOT",
+      "ContractSize": 1,
+      "VolumeStep": 20
+    },
+    {
+      "Asset": "ETH",
+      "ContractSize": 0.01,
+      "VolumeStep": 6
+    },
+    {
+      "Asset": "FIL",
+      "ContractSize": 0.1,
+      "VolumeStep": 240
+    },
+    {
+      "Asset": "LINK",
+      "ContractSize": 0.1,
+      "VolumeStep": 140
+    },
+    {
+      "Asset": "LTC",
+      "ContractSize": 0.1,
+      "VolumeStep": 12
+    },
+    {
+      "Asset": "MANA",
+      "ContractSize": 10,
+      "VolumeStep": 28
+    },
+    {
+      "Asset": "MATIC",
+      "ContractSize": 100,
+      "VolumeStep": 2
+    },
+    {
+      "Asset": "OP",
+      "ContractSize": 0.1,
+      "VolumeStep": 700
+    },
+    {
+      "Asset": "RNDR",
+      "ContractSize": 1,
+      "VolumeStep": 60
+    },
+    {
+      "Asset": "SAND",
+      "ContractSize": 10,
+      "VolumeStep": 24
+    },
+    {
+      "Asset": "SHIB",
+      "ContractSize": 1000,
+      "VolumeStep": 10000
+    },
+    {
+      "Asset": "SOL",
+      "ContractSize": 1,
+      "VolumeStep": 4
+    },
+    {
+      "Asset": "TRX",
+      "ContractSize": 100,
+      "VolumeStep": 12
+    },
+    {
+      "Asset": "UNI",
+      "ContractSize": 1,
+      "VolumeStep": 18
+    },
+    {
+      "Asset": "XMR",
+      "ContractSize": 0.01,
+      "VolumeStep": 60
+    },
+    {
+      "Asset": "XRP",
+      "ContractSize": 10,
+      "VolumeStep": 14
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+﻿.ts-container {
+    display: grid;
+    grid-template-columns: 1fr 2fr 2fr 2fr 2fr;
+    grid-template-rows: 1fr;
+    width: 100%;
+    height: 100%;
+    justify-items: center;
+    align-items: center;
+    column-gap: 4px;
+    row-gap: 4px;
+}
+
+.ts-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.ts-item-environment {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+
+.ts-item-environment-dev {
+    background-color: darkgreen;
+}
+
+.ts-item-environment-prd {
+    background-color: darkred;
+}
+
+.ts-item-time {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+
+.ts-item-time-timeout {
+    background-color: deeppink;
+    text-align: center;
+}
+
+.ts-item-pnl-long {
+    grid-column-start: 3;
+    grid-column-end: 4;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+
+.ts-item-pnl-short {
+    grid-column-start: 4;
+    grid-column-end: 5;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+
+.ts-item-pnl-total {
+    grid-column-start: 5;
+    grid-column-end: 6;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}

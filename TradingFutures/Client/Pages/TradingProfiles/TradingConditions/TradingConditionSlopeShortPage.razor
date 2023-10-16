@@ -1,0 +1,73 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Data;
+@using TradingFutures.Shared.Entities;
+@using TradingFutures.Shared.Utils;
+@using TradingFutures.Shared;
+
+@inherits TradingConditionBasePage
+
+<div class="ts-container ts-border-neutral">
+    @* main *@
+    <div class="ts-item ts-item-btn ts-item-main-up" onclick="@(async () => await BtnMain_Clicked(incrementUp: true))">
+        <i class="fa-solid fa-chevron-up" />
+    </div>
+    <div class="@GetItemClass("main",GetMain(TradingCondition))">
+        <i class="fa-solid @SwitchStringPlusMinusX(GetMain(TradingCondition))" />
+    </div>
+    <div class="ts-item ts-item-btn ts-item-main-down" onclick="@(async () => await BtnMain_Clicked(incrementUp: false))">
+        <i class="fa-solid fa-chevron-down" />
+    </div>
+    @* trend *@
+    <div class="ts-item ts-item-btn ts-item-trend-up" onclick="@(async () => await BtnTrend_Clicked(incrementUp: true))">
+        <i class="fa-solid fa-chevron-up" />
+    </div>
+    <div class="@GetItemClass("trend", GetTrend(TradingCondition))">
+        <i class="fa-solid @SwitchStringTrend(GetTrend(TradingCondition))" />
+    </div>
+    <div class="ts-item ts-item-btn ts-item-trend-down" onclick="@(async () => await BtnTrend_Clicked(incrementUp: false))">
+        <i class="fa-solid fa-chevron-down" />
+    </div>
+    @* threshold *@
+    <div class="ts-item ts-item-btn ts-item-threshold-up" onclick="@(async () => await BtnThreshold_Clicked(incrementPromile: 0.01M))">
+        <i class="fa-solid fa-chevron-up" />
+    </div>
+    <div class="@GetItemClass("threshold", GetThresholdPromile(TradingCondition))">
+        @CommonUtilities.ToDefaultString(GetThresholdPromile(TradingCondition), decimals: 2, includeSign: true)
+    </div>
+    <div class="ts-item ts-item-btn ts-item-threshold-down" onclick="@(async () => await BtnThreshold_Clicked(incrementPromile: -0.01M))">
+        <i class="fa-solid fa-chevron-down" />
+    </div>   
+</div>
+
+@code{
+    protected override short GetMain(TradingConditionEntity tradingCondition)
+    {
+        return tradingCondition.SlopeShortMode;
+    }
+
+    protected override void SetMain(TradingConditionEntity tradingCondition, short value)
+    {
+        tradingCondition.SlopeShortMode = value;
+    }
+
+    protected override short GetTrend(TradingConditionEntity tradingCondition)
+    {
+        return tradingCondition.SlopeTrendShortMode;
+    }
+
+    protected override void SetTrend(TradingConditionEntity tradingCondition, short value)
+    {
+        tradingCondition.SlopeTrendShortMode = value;
+    }
+
+    protected override decimal GetThresholdPromile(TradingConditionEntity tradingCondition)
+    {
+        return tradingCondition.SlopeShortThreshold * 1000M;
+    }
+
+    protected override void SetThresholdPromile(TradingConditionEntity tradingCondition, decimal value)
+    {
+        tradingCondition.SlopeShortThreshold = value / 1000M;
+    }
+}

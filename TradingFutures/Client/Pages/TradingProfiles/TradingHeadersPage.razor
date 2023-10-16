@@ -1,0 +1,59 @@
+﻿@using System.Drawing;
+@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Data;
+@using TradingFutures.Shared.Entities;
+@using TradingFutures.Shared.Keys;
+
+@implements IDisposable
+
+@inject IClientSettingsService ClientSettings
+@inject ITradingClientService TradingClientService
+
+<div class="ts-container" style="@ContainerStyleTemplate">
+    @{
+        var curRow = 1;
+        var curColumn = 1;
+
+        foreach (var tradingInterval in TradingIntervals)
+        {
+            var itemStyle = string.Format(ItemStyleTemplate, curColumn, curColumn + 1, curRow, curRow + 1, RowHeight);
+
+            <div class="ts-item" style="@itemStyle">
+                @tradingInterval
+            </div>
+
+            curRow++;
+        }
+    }    
+</div>
+
+@code{    
+
+    private IEnumerable<TradingInterval> TradingIntervals => TradingInterval.GetAll();
+
+    private int ColumnsAmount => 1;
+
+    private int RowsAmount => TradingIntervals.Count();
+
+    private int RowHeight => ClientSettings.WindowSize.GetRowHeight(RowsAmount + 1);
+
+    private string ContainerStyleTemplate => $"--grid-template-columns:{string.Join(" ", Enumerable.Repeat("1fr", ColumnsAmount))};--grid-template-rows:{string.Join(" ", Enumerable.Repeat("1fr", RowsAmount))};";
+
+    private string ItemStyleTemplate => "--grid-column-start:{0};--grid-column-end:{1};--grid-row-start:{2};--grid-row-end:{3};--height:{4}px";
+
+    protected override void OnInitialized()
+    {
+        ClientSettings.Updated += clientSettings_Updated;
+    }    
+
+    public void Dispose()
+    {
+        ClientSettings.Updated -= clientSettings_Updated;        
+    }        
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }    
+}

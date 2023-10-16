@@ -1,0 +1,66 @@
+﻿@using System.Drawing;
+@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Data;
+@using TradingFutures.Shared.Entities;
+@using TradingFutures.Shared.Keys;
+
+@implements IDisposable
+
+@inject IClientSettingsService ClientSettings
+@inject ICacheService ClientCache
+@inject ITradingClientService TradingClientService
+
+<div style="overflow-y:auto;height:@HeightStr;">
+    <div class="ts-container">
+        @{
+            <div class="ts-item ts-item-body">
+                @if (ClientSettings.CurrentTradingProfile.Value != TradingProfileId._EMPTY)
+                {
+                    var tradingProfile = ClientCache.TradingProfile.GetByKey(ClientSettings.CurrentTradingProfile.Value);
+                    if (tradingProfile == null)
+                        tradingProfile = new TradingProfileEntity(new TradingProfileKey(ClientSettings.CurrentTradingProfile.Value));
+
+                    <TradingProfilePage TradingProfile=tradingProfile />
+                }
+            </div>            
+        }    
+    </div>
+</div>
+
+@code{
+    private string HeightStr => $"{ClientSettings.WindowSize.ClientAreaHeight}px";    
+
+    private IEnumerable<TradingProfileId> TradingProfileIds => TradingProfileId.GetAll();    
+
+    protected async override Task OnInitializedAsync()
+    {
+        ClientSettings.Updated += clientSettings_Updated;
+
+        ClientCache.TradingProfile.Updated += tradinProfile_Updated;
+
+        await TradingClientService.GetAllTradingProfiles(updateCache: true);
+    }    
+
+    public void Dispose()
+    {
+        ClientSettings.Updated -= clientSettings_Updated;
+
+        ClientCache.TradingProfile.Updated -= tradinProfile_Updated;
+    }
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task tradinProfile_Updated(IEnumerable<TradingProfileEntity> tradingProfiles)
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task currentTradingProfile_Changed(ChangeEventArgs e)
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+}

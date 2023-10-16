@@ -1,0 +1,139 @@
+﻿@using System.Drawing;
+@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Data;
+@using TradingFutures.Shared.Entities;
+
+@implements IDisposable
+
+@inject IClientSettingsService ClientSettings
+@inject ICacheService ClientCache
+@inject ITradingClientService TradingClientService
+
+<div style="overflow-y:auto;height:@HeightStr;">
+    <div class="ts-container" style="@ContainerStyleTemplate">
+        @{
+            var curRow = 1;
+            var curColumn = 1;
+
+            refreshSortedTradingAssets();
+
+            foreach (var tradingAsset in _sortedTradingAssets)
+            {
+                var itemStyle = string.Format(ItemStyleTemplate, curColumn, curColumn + 1, curRow, curRow + 1, RowHeight);
+
+                <div class="ts-item" style="@itemStyle">
+                    <TradingPositionPage Asset=@tradingAsset />
+                </div>
+
+                curColumn++;
+                if (curColumn > ColumnsAmount)
+                {
+                    curColumn = 1;
+                    curRow++;
+                }
+            }
+        }    
+    </div>
+</div>
+
+@code{
+    private readonly List<string> _sortedTradingAssets = new List<string>();
+    private string _lastSortHash = string.Empty;
+
+    private string HeightStr => $"{ClientSettings.WindowSize.ClientAreaHeight}px";
+
+    private int ColumnsAmount => ClientSettings.WindowSize.GetVisibleColumnsAmount();
+
+    private int RowsAmount => ClientSettings.WindowSize.GetVisibleRowsAmount();
+
+    private int RowHeight => ClientSettings.WindowSize.GetRowHeight(RowsAmount);
+
+    private string ContainerStyleTemplate => $"--grid-template-columns:{string.Join(" ", Enumerable.Repeat("1fr", ColumnsAmount))};--grid-template-rows:{string.Join(" ", Enumerable.Repeat("1fr", RowsAmount))};";
+
+    private string ItemStyleTemplate => "--grid-column-start:{0};--grid-column-end:{1};--grid-row-start:{2};--grid-row-end:{3};--height:{4}px";    
+
+    protected override async Task OnInitializedAsync()
+    {
+        ClientSettings.Updated += clientSettings_Updated;
+
+        ClientCache.TradingPosition.Updated += tradingPosition_Updated;
+        ClientCache.TradingProfile.Updated += tradinProfile_Updated;
+
+        await TradingClientService.GetAllTradingProfiles(updateCache: true);
+    }
+
+    public void Dispose()
+    {
+        ClientSettings.Updated -= clientSettings_Updated;
+
+        ClientCache.TradingPosition.Updated -= tradingPosition_Updated;
+        ClientCache.TradingProfile.Updated -= tradinProfile_Updated;
+    }
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task tradingPosition_Updated(IEnumerable<TradingPositionEntity> tradingPositionEntities)
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task tradinProfile_Updated(IEnumerable<TradingProfileEntity> tradingProfiles)
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void refreshSortedTradingAssets()
+    {
+        var sortHash = $"{ClientSettings.IsShortMode.Value}|{ClientSettings.SortMode.Value}|{ClientSettings.SortDirection.Value}";
+        if (!ClientSettings.FreezeSort.Value || _lastSortHash != sortHash || !_sortedTradingAssets.Any())
+        {
+            var sortedTradingAssets = getSortedTradingAssets();
+            _sortedTradingAssets.Clear();
+            if (sortedTradingAssets.Any())
+                _sortedTradingAssets.AddRange(sortedTradingAssets);
+
+            _lastSortHash = sortHash;
+        }        
+    }
+
+    private IEnumerable<string> getSortedTradingAssets()
+    {
+        var sourcePositions = ClientCache.TradingPosition.GetSortedPositions(
+            ClientSettings.IsShortMode.GetTradingOrderSide(),
+            ClientSettings.SortMode.Value,
+            ClientSettings.SortDirection.Value);
+
+        var resultAssets = new List<string>();
+
+        if (ClientSettings.SortDirection.Value == SortMode._EMPTY)
+        {
+            if (sourcePositions.Any())
+                resultAssets.AddRange(sourcePositions.Select(v => v.Asset));
+        }
+        else
+        {
+            var activePositions = new List<TradingPositionEntity>();
+            var inactivePositions = new List<TradingPositionEntity>();
+
+            foreach (var sourcePosition in sourcePositions)
+            {
+                if (sourcePosition.HasCoins())
+                    activePositions.Add(sourcePosition);
+                else
+                    inactivePositions.Add(sourcePosition);
+            }            
+
+            if (activePositions.Any())
+                resultAssets.AddRange(activePositions.Select(v => v.Asset));
+
+            if (inactivePositions.Any())
+                resultAssets.AddRange(inactivePositions.Select(v => v.Asset));
+        }        
+
+        return resultAssets;
+    }
+}

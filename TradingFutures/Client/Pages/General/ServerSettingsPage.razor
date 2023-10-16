@@ -1,0 +1,124 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Client.Services;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Entities;
+@using TradingFutures.Shared.Utils;
+
+@implements IDisposable
+
+@inject ICacheService ClientCache
+@inject ITradingClientService TradingClient
+
+<div class="ts-container">   
+    <div class="@getItemClass("assistant-enabled", isButton: true, highlightA: ServerSettings.TradingAssistantEnabled)" onclick=@btnAssistantEnabled_Clicked>
+        <i class="fa-solid fa-a" />
+        <i class="fa-solid fa-s" />
+        <i class="fa-solid fa-s" />
+    </div>
+    <div class="@getItemClass("bot-enabled", isButton: true, highlightB: ServerSettings.TradingBotEnabled)" onclick=@btnBotEnabled_Clicked>
+        <i class="fa-solid fa-b" />
+        <i class="fa-solid fa-o" />
+        <i class="fa-solid fa-t" />
+    </div>
+    <div class="@getItemClass("bot-exceed-buy-mode", isButton: true,  highlightB: ServerSettings.TradingBotExceedBuyMode)" onclick=@btnBotExceedBuyMode_Clicked>
+        <i class="fa-solid fa-square-plus" />
+    </div>
+    <div class="@getItemClass("bot-exceed-sell-mode", isButton: true,  highlightB: ServerSettings.TradingBotExceedSellMode)" onclick=@btnBotExceedSellMode_Clicked>
+        <i class="fa-solid fa-square-minus" />
+    </div>
+    <div class="@getItemClass("bot-compensation-mode", isButton: true,  highlightB: ServerSettings.TradingBotCompensationMode)" onclick=@btnBotCompensationMode_Clicked>
+        <i class="fa-solid fa-fire" />
+    </div>
+    <div class="@getItemClass("bot-sell-losses", isButton: true, highlightB: ServerSettings.TradingBotSellLossesMode)" onclick=@btnBotSellLosses_Clicked>
+        <i class="fa-solid fa-umbrella" />
+    </div>
+    <div class="@getItemClass("password")">
+        <InputText @bind-Value=@PasswordValue type="password" style="width: 100%" />
+    </div>    
+</div>
+
+@code {
+    private string? PasswordValue;
+
+    private ServerSettingsEntity ServerSettings => ClientCache.ServerSettings.Get();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        TradingClientService.PasswordFunc =
+        () =>
+        {
+            return PasswordValue ?? string.Empty;
+        };
+
+        ClientCache.ServerStatus.Updated += serverStatus_Updated;
+    }
+
+    public void Dispose()
+    {
+        ClientCache.ServerStatus.Updated -= serverStatus_Updated;
+    }
+
+    private async Task serverStatus_Updated(IEnumerable<ServerStatusEntity> serverTime)
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task btnAssistantEnabled_Clicked()
+    {
+        var serverSettings = ServerSettings.GetCopy();
+        serverSettings.TradingAssistantEnabled = !serverSettings.TradingAssistantEnabled;
+        await TradingClient.UpdateServerSettings(serverSettings);
+    }
+
+    private async Task btnBotEnabled_Clicked()
+    {
+        var serverSettings = ServerSettings.GetCopy();
+        serverSettings.TradingBotEnabled = !serverSettings.TradingBotEnabled;
+        await TradingClient.UpdateServerSettings(serverSettings);
+    }
+
+    private async Task btnBotExceedBuyMode_Clicked()
+    {
+        var serverSettings = ServerSettings.GetCopy();
+        serverSettings.TradingBotExceedBuyMode = !serverSettings.TradingBotExceedBuyMode;
+        await TradingClient.UpdateServerSettings(serverSettings);
+    }
+
+    private async Task btnBotExceedSellMode_Clicked()
+    {
+        var serverSettings = ServerSettings.GetCopy();
+        serverSettings.TradingBotExceedSellMode = !serverSettings.TradingBotExceedSellMode;
+        await TradingClient.UpdateServerSettings(serverSettings);
+    }
+
+    private async Task btnBotCompensationMode_Clicked()
+    {
+        var serverSettings = ServerSettings.GetCopy();
+        serverSettings.TradingBotCompensationMode = !serverSettings.TradingBotCompensationMode;
+        await TradingClient.UpdateServerSettings(serverSettings);
+    }
+
+    private async Task btnBotSellLosses_Clicked()
+    {
+        var serverSettings = ServerSettings.GetCopy();
+        serverSettings.TradingBotSellLossesMode = !serverSettings.TradingBotSellLossesMode;
+        await TradingClient.UpdateServerSettings(serverSettings);
+    }
+
+    private string getItemClass(string name, bool isButton = false, bool? highlightDefault = null, bool? highlightA = null, bool? highlightB = null)
+    {
+        var btnClass = isButton ? "ts-item-btn" : string.Empty;
+
+        var highlightClass = string.Empty;
+        if (highlightDefault.HasValue)
+            highlightClass = highlightDefault.Value ? string.Empty : "ts-text-inactive";
+        if (highlightA.HasValue)
+            highlightClass = highlightA.Value ? "ts-text-highlighted-a" : "ts-text-inactive";
+        if (highlightB.HasValue)
+            highlightClass = highlightB.Value ? "ts-text-highlighted-b" : "ts-text-inactive";
+
+        return $"ts-item ts-item-{name} {btnClass} {highlightClass}";
+    }
+}

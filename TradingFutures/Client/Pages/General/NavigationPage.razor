@@ -1,0 +1,69 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Client.Services;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Entities;
+@using TradingFutures.Shared.Utils;
+
+@implements IDisposable
+
+@inject IClientSettingsService ClientSettings
+
+<div class="ts-container">
+    <div class="ts-item-home">
+        <div class="ts-cursor-pointer" onclick=@btnHome_Clicked>
+            <i class="@getItemClass("fa-solid fa-house", 0)" />
+        </div>
+    </div>
+    <div class="ts-item-conditions">
+        <div class="ts-cursor-pointer" onclick=@btnConditions_Clicked>
+            <i class="@getItemClass("fa-solid fa-fan", 1)" />            
+        </div>
+    </div>
+    <div class="ts-item-settings">
+        <div class="ts-cursor-pointer" onclick=@btnSettings_Clicked>
+            <i class="@getItemClass("fa-solid fa-gear", 2)" />
+        </div>
+    </div>
+</div>
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ClientSettings.Updated += clientSettings_Updated;
+    }
+
+    public void Dispose()
+    {
+        ClientSettings.Updated -= clientSettings_Updated;
+    }
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string getItemClass(string source, int pageIndex)
+    {
+        return pageIndex == ClientSettings.CurrentPage.Value
+        ? source
+        : $"{source} ts-text-inactive";
+    }
+
+    private async Task btnHome_Clicked()
+    {
+        await ClientSettings.CurrentPage.Set(0);
+    }
+
+    private async Task btnConditions_Clicked()
+    {
+        await ClientSettings.CurrentPage.Set(1);
+    }
+
+    private async Task btnSettings_Clicked()
+    {
+        await ClientSettings.CurrentPage.Set(2);
+    }
+}

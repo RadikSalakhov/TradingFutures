@@ -1,0 +1,115 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Data;
+@using TradingFutures.Shared.Entities;
+@using TradingFutures.Shared.Utils;
+@using TradingFutures.Shared;
+
+@implements IDisposable
+
+@inject IClientSettingsService ClientSettings
+@inject ICacheService CacheService
+@inject ITradingClientService TradingClientService
+
+@code{
+    [Parameter]
+    public TradingConditionEntity TradingCondition { get; set; } = new TradingConditionEntity();
+
+    protected virtual short GetMain(TradingConditionEntity tradingCondition) { return 0; }    
+    protected virtual void SetMain(TradingConditionEntity tradingCondition, short value) { }
+
+    protected virtual short GetTrend(TradingConditionEntity tradingCondition) { return 0; }
+    protected virtual void SetTrend(TradingConditionEntity tradingCondition, short value) { }
+
+    protected virtual decimal GetThresholdPromile(TradingConditionEntity tradingCondition) { return 0; }
+    protected virtual void SetThresholdPromile(TradingConditionEntity tradingCondition, decimal value) { }    
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ClientSettings.Updated += clientSettings_Updated;
+    }
+
+    public void Dispose()
+    {
+        ClientSettings.Updated -= clientSettings_Updated;        
+    }
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected async Task BtnMain_Clicked(bool incrementUp)
+    {
+        var tradingCondition = TradingCondition.GetCopy();
+
+        var main = GetMain(tradingCondition);
+        main = MathUtilities.IncrementClamp(main, incrementUp);
+        SetMain(tradingCondition, main);
+
+        await UpdateTradingCondition(tradingCondition);
+    }
+
+    protected async Task BtnTrend_Clicked(bool incrementUp)
+    {
+        var tradingCondition = TradingCondition.GetCopy();
+
+        var trend = GetTrend(tradingCondition);
+        trend = MathUtilities.IncrementClamp(trend, incrementUp);
+        SetTrend(tradingCondition, trend);
+
+        await UpdateTradingCondition(tradingCondition);
+    }
+
+    protected async Task BtnThreshold_Clicked(decimal incrementPromile)
+    {
+        var tradingCondition = TradingCondition.GetCopy();
+
+        var thresholdPromile = GetThresholdPromile(tradingCondition);
+        thresholdPromile += incrementPromile;
+        SetThresholdPromile(tradingCondition, thresholdPromile);
+
+        await UpdateTradingCondition(tradingCondition);
+    }   
+
+    protected string GetItemClass(string name, decimal value)
+    {
+        string extraClass;
+        if (value > 0)
+            extraClass = "ts-background-color-plus-light";
+        else if (value < 0)
+            extraClass = "ts-background-color-minus-light";
+        else
+            extraClass = "ts-text-inactive";
+
+        return $"ts-item ts-item-{name} {extraClass}";
+    }    
+
+    protected string GetBtnItemClass(string name, bool isEnabled)
+    {
+        var enabledClass = isEnabled 
+            ? "ts-background-color-plus-light"
+            : "ts-text-inactive";        
+
+        return $"ts-item ts-item-btn ts-item-{name} {enabledClass}";
+    }
+
+    protected string SwitchStringPlusMinusX(short value)
+    {
+        return CommonUtilities.SwitchString(value, "fa-plus", "fa-minus", "fa-xmark");
+    }
+
+    protected string SwitchStringTrend(short value)
+    {
+        return CommonUtilities.SwitchString(value, "fa-arrow-trend-up", "fa-arrow-trend-down", "fa-xmark");
+    }
+
+    protected async Task UpdateTradingCondition(TradingConditionEntity tradingCondition)
+    {
+        await TradingClientService.UpdateTradingCondition(tradingCondition);
+
+        await TradingClientService.GetAllTradingProfiles(updateCache: true);
+    }
+}

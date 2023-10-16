@@ -1,0 +1,137 @@
+﻿@page "/"
+
+@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Client.Pages.General
+@using TradingFutures.Client.Pages.Settings
+@using TradingFutures.Client.Pages.TradingPositions;
+@using TradingFutures.Client.Pages.TradingProfiles
+
+@implements IDisposable
+
+@inject IBrowserService BrowserService
+@inject IClientSettingsService ClientSettings
+
+<PageTitle>Trading Futures</PageTitle>
+
+@if (ClientSettings.WindowSize.IsDesktop)
+{
+    <div class="ts-desktop-container">
+        <div class="ts-desktop-item-general-status ts-cell">
+            <GeneralStatusPage />
+        </div>
+        <div class="ts-desktop-item-commited-pnl ts-cell">
+            <CommitedPnlPage />
+        </div>        
+        <div class="ts-desktop-item-server-settings ts-cell">
+            <ServerSettingsPage />
+        </div>
+        <div class="ts-desktop-item-client-settings ts-cell">
+            @if (ClientSettings.CurrentPage.Value == 0)
+            {
+                <ClientSettingsPage />
+            }
+            else if (ClientSettings.CurrentPage.Value == 1)
+            {
+                <TradingProfileSettingsPage />
+            }
+        </div>
+        <div class="ts-desktop-item-navigation ts-cell">
+            <NavigationPage />
+        </div>
+        <div class="ts-desktop-item-main ts-cell">
+            @if (ClientSettings.CurrentPage.Value == 0)
+            {
+                <TradingPositionsContainerPage />
+            }
+            else if (ClientSettings.CurrentPage.Value == 1)
+            {
+                <TradingProfilesContainerPage />
+            }
+            else if (ClientSettings.CurrentPage.Value == 2)
+            {
+                <SettingsContainerPage />
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="ts-mobile-container">
+        <div class="ts-mobile-item-general-status ts-cell">
+            <GeneralStatusPage />
+        </div>
+        <div class="ts-mobile-item-commited-pnl ts-cell">
+            <CommitedPnlPage />
+        </div>        
+        <div class="ts-mobile-item-server-settings ts-cell">
+            <ServerSettingsPage />
+        </div>
+        <div class="ts-mobile-item-client-settings ts-cell">
+            @if (ClientSettings.CurrentPage.Value == 0)
+            {
+                <ClientSettingsPage />
+            }
+            else if (ClientSettings.CurrentPage.Value == 1)
+            {
+                <TradingProfileSettingsPage />
+            }
+        </div>
+        <div class="ts-mobile-item-navigation ts-cell">
+            <NavigationPage />
+        </div>
+        <div class="ts-mobile-item-main ts-cell">
+            @if (ClientSettings.CurrentPage.Value == 0)
+            {
+                <TradingPositionsContainerPage />
+            }
+            else if (ClientSettings.CurrentPage.Value == 1)
+            {
+                <TradingProfilesContainerPage />
+            }
+            else if (ClientSettings.CurrentPage.Value == 2)
+            {
+                <SettingsContainerPage />
+            }
+        </div>
+    </div>
+}
+
+@code
+{
+    private TradingPositionsContainerPage? _assetsContainerPage;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await BrowserService.InitializeResizeListener(this);
+
+            await UpdateWindowSize();
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ClientSettings.Updated += clientSettings_Updated;
+    }
+
+    public void Dispose()
+    {
+        ClientSettings.Updated -= clientSettings_Updated;
+    }
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public async Task UpdateWindowSize()
+    {
+        var windowSize = await BrowserService.GetWindowSize();
+
+        await ClientSettings.WindowSize.Set(windowSize);
+    }
+}

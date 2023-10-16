@@ -1,0 +1,349 @@
+﻿.ts-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    width: 100%;
+    height: 100%;
+    justify-items: center;
+    align-items: center;
+    column-gap: 1px;
+    row-gap: 1px;
+}
+
+.ts-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    font-size: 8px;
+}
+
+.ts-item-trend {
+    justify-content: space-evenly;
+}
+
+/*slope-short*/
+.ts-item-slope-short-1s {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 1;
+    grid-row-end: 2;
+    background-color: var(--background-color);
+}
+
+.ts-item-slope-short-1m {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 2;
+    grid-row-end: 3;
+    background-color: var(--background-color);
+}
+
+.ts-item-slope-short-5m {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 3;
+    grid-row-end: 4;
+    background-color: var(--background-color);
+}
+
+.ts-item-slope-short-15m {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 4;
+    grid-row-end: 5;
+    background-color: var(--background-color);
+}
+
+.ts-item-slope-short-30m {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 5;
+    grid-row-end: 6;
+    background-color: var(--background-color);
+}
+
+.ts-item-slope-short-1h {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 6;
+    grid-row-end: 7;
+    background-color: var(--background-color);
+}
+
+.ts-item-slope-short-4h {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 7;
+    grid-row-end: 8;
+    background-color: var(--background-color);
+}
+
+.ts-item-slope-short-12h {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 8;
+    grid-row-end: 9;
+    background-color: var(--background-color);
+}
+
+/*slope-long*/
+.ts-item-slope-long-1s {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 1;
+    grid-row-end: 2;
+    background-color: var(--background-color);
+}
+
+.ts-item-slope-long-1m {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 2;
+    grid-row-end: 3;
+    background-color: var(--background-color);
+}
+
+.ts-item-slope-long-5m {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 3;
+    grid-row-end: 4;
+    background-color: var(--background-color);
+}
+
+.ts-item-slope-long-15m {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 4;
+    grid-row-end: 5;
+    background-color: var(--background-color);
+}
+
+.ts-item-slope-long-30m {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 5;
+    grid-row-end: 6;
+    background-color: var(--background-color);
+}
+
+.ts-item-slope-long-1h {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 6;
+    grid-row-end: 7;
+    background-color: var(--background-color);
+}
+
+.ts-item-slope-long-4h {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 7;
+    grid-row-end: 8;
+    background-color: var(--background-color);
+}
+
+.ts-item-slope-long-12h {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 8;
+    grid-row-end: 9;
+    background-color: var(--background-color);
+}
+
+/*cross-diff*/
+.ts-item-cross-diff-1s {
+    grid-column-start: 3;
+    grid-column-end: 4;
+    grid-row-start: 1;
+    grid-row-end: 2;
+    background-color: var(--background-color);
+}
+
+.ts-item-cross-diff-1m {
+    grid-column-start: 3;
+    grid-column-end: 4;
+    grid-row-start: 2;
+    grid-row-end: 3;
+    background-color: var(--background-color);
+}
+
+.ts-item-cross-diff-5m {
+    grid-column-start: 3;
+    grid-column-end: 4;
+    grid-row-start: 3;
+    grid-row-end: 4;
+    background-color: var(--background-color);
+}
+
+.ts-item-cross-diff-15m {
+    grid-column-start: 3;
+    grid-column-end: 4;
+    grid-row-start: 4;
+    grid-row-end: 5;
+    background-color: var(--background-color);
+}
+
+.ts-item-cross-diff-30m {
+    grid-column-start: 3;
+    grid-column-end: 4;
+    grid-row-start: 5;
+    grid-row-end: 6;
+    background-color: var(--background-color);
+}
+
+.ts-item-cross-diff-1h {
+    grid-column-start: 3;
+    grid-column-end: 4;
+    grid-row-start: 6;
+    grid-row-end: 7;
+    background-color: var(--background-color);
+}
+
+.ts-item-cross-diff-4h {
+    grid-column-start: 3;
+    grid-column-end: 4;
+    grid-row-start: 7;
+    grid-row-end: 8;
+    background-color: var(--background-color);
+}
+
+.ts-item-cross-diff-12h {
+    grid-column-start: 3;
+    grid-column-end: 4;
+    grid-row-start: 8;
+    grid-row-end: 9;
+    background-color: var(--background-color);
+}
+
+/*price-short-diff*/
+.ts-item-price-short-diff-1s {
+    grid-column-start: 4;
+    grid-column-end: 5;
+    grid-row-start: 1;
+    grid-row-end: 2;
+    background-color: var(--background-color);
+}
+
+.ts-item-price-short-diff-1m {
+    grid-column-start: 4;
+    grid-column-end: 5;
+    grid-row-start: 2;
+    grid-row-end: 3;
+    background-color: var(--background-color);
+}
+
+.ts-item-price-short-diff-5m {
+    grid-column-start: 4;
+    grid-column-end: 5;
+    grid-row-start: 3;
+    grid-row-end: 4;
+    background-color: var(--background-color);
+}
+
+.ts-item-price-short-diff-15m {
+    grid-column-start: 4;
+    grid-column-end: 5;
+    grid-row-start: 4;
+    grid-row-end: 5;
+    background-color: var(--background-color);
+}
+
+.ts-item-price-short-diff-30m {
+    grid-column-start: 4;
+    grid-column-end: 5;
+    grid-row-start: 5;
+    grid-row-end: 6;
+    background-color: var(--background-color);
+}
+
+.ts-item-price-short-diff-1h {
+    grid-column-start: 4;
+    grid-column-end: 5;
+    grid-row-start: 6;
+    grid-row-end: 7;
+    background-color: var(--background-color);
+}
+
+.ts-item-price-short-diff-4h {
+    grid-column-start: 4;
+    grid-column-end: 5;
+    grid-row-start: 7;
+    grid-row-end: 8;
+    background-color: var(--background-color);
+}
+
+.ts-item-price-short-diff-12h {
+    grid-column-start: 4;
+    grid-column-end: 5;
+    grid-row-start: 8;
+    grid-row-end: 9;
+    background-color: var(--background-color);
+}
+
+/*price-long-diff*/
+.ts-item-price-long-diff-1s {
+    grid-column-start: 5;
+    grid-column-end: 6;
+    grid-row-start: 1;
+    grid-row-end: 2;
+    background-color: var(--background-color);
+}
+
+.ts-item-price-long-diff-1m {
+    grid-column-start: 5;
+    grid-column-end: 6;
+    grid-row-start: 2;
+    grid-row-end: 3;
+    background-color: var(--background-color);
+}
+
+.ts-item-price-long-diff-5m {
+    grid-column-start: 5;
+    grid-column-end: 6;
+    grid-row-start: 3;
+    grid-row-end: 4;
+    background-color: var(--background-color);
+}
+
+.ts-item-price-long-diff-15m {
+    grid-column-start: 5;
+    grid-column-end: 6;
+    grid-row-start: 4;
+    grid-row-end: 5;
+    background-color: var(--background-color);
+}
+
+.ts-item-price-long-diff-30m {
+    grid-column-start: 5;
+    grid-column-end: 6;
+    grid-row-start: 5;
+    grid-row-end: 6;
+    background-color: var(--background-color);
+}
+
+.ts-item-price-long-diff-1h {
+    grid-column-start: 5;
+    grid-column-end: 6;
+    grid-row-start: 6;
+    grid-row-end: 7;
+    background-color: var(--background-color);
+}
+
+.ts-item-price-long-diff-4h {
+    grid-column-start: 5;
+    grid-column-end: 6;
+    grid-row-start: 7;
+    grid-row-end: 8;
+    background-color: var(--background-color);
+}
+
+.ts-item-price-long-diff-12h {
+    grid-column-start: 5;
+    grid-column-end: 6;
+    grid-row-start: 8;
+    grid-row-end: 9;
+    background-color: var(--background-color);
+}

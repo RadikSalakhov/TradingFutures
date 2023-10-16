@@ -1,0 +1,58 @@
+﻿@using TradingFutures.Client.Hubs;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Entities;
+
+@inherits LayoutComponentBase
+
+@implements IDisposable
+
+@inject IHubClient HubClient
+
+@*<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+*@
+
+<div class="page">
+    @Body
+</div>
+
+@code {
+
+    private Timer? _hearBeatTimer;    
+
+    protected async override Task OnInitializedAsync()
+    {
+        _hearBeatTimer = new Timer(async state => await onHearBeat(state), null, 0, 1000);
+
+        
+
+        await HubClient.StartAsync();
+    }
+
+    public void Dispose()
+    {
+        if (_hearBeatTimer != null)
+        {
+            _hearBeatTimer.Dispose();
+            _hearBeatTimer = null;
+        }                
+    }
+
+    private async Task onHearBeat(object? state)
+    {
+        await HubClient.CheckConnection();
+    }
+}

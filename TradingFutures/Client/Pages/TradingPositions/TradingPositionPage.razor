@@ -1,0 +1,71 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Data;
+@using TradingFutures.Shared.Entities;
+
+@inject IClientSettingsService ClientSettings
+@inject ICacheService ClientCache
+
+<div class="@getClass()">    
+    <div class="ts-item-header">
+        <TradingPositionPageHeader Asset=@Asset />
+    </div>
+    <div class="ts-item-body">
+        <TradingPositionPageBody Asset=@Asset />
+    </div>
+    <div class="ts-item-footer">
+        <TradingPositionPageFooter Asset=@Asset />
+    </div>
+</div>
+
+@code{
+    [Parameter]
+    public string Asset { get; set; } = string.Empty;
+
+    private ServerSettingsEntity ServerSettings => ClientCache.ServerSettings.Get();
+
+    private TradingOrderSide TradingOrderSide => ClientSettings.IsShortMode.GetTradingOrderSide();
+
+    private TradingPositionEntity TradingPosition => ClientCache.TradingPosition.GetTradingPositionOrDefault(TradingOrderSide, Asset);
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ClientSettings.Updated += clientSettings_Updated;
+
+        ClientCache.TradingPosition.Updated += tradingPosition_Updated;
+    }
+
+    public void Dispose()
+    {
+        ClientSettings.Updated -= clientSettings_Updated;
+
+        ClientCache.TradingPosition.Updated -= tradingPosition_Updated;
+    }
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task tradingPosition_Updated(IEnumerable<TradingPositionEntity> tradingPositionEntities)
+    {
+        if (tradingPositionEntities != null && tradingPositionEntities.Any(v => v.Asset == Asset))        
+            await InvokeAsync(StateHasChanged);
+    }
+
+    private string getClass()
+    {
+        if (!TradingPosition.HasCoins())
+            return "ts-container ts-border-neutral";
+
+        if (TradingPosition.IsPnlThreasholdReached(ServerSettings.MinPnl))
+            return "ts-container ts-border-positive";
+
+        if (TradingPosition.TradingPositionSettings?.AssistantBuyEnabled == true || TradingPosition.TradingPositionSettings?.AssistantSellEnabled == true)
+            return "ts-container ts-border-highlighted";
+
+        return "ts-container ts-border-negative";
+    }
+}

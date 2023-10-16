@@ -1,0 +1,84 @@
+﻿.ts-color-plus {
+    color: darkgreen;
+}
+
+.ts-color-plus-light {
+    color: seagreen;
+}
+
+.ts-color-minus {
+    color: darkred;
+}
+
+.ts-color-minus-light {
+    color: indianred;
+}
+
+.ts-background-color-plus {
+    background-color: darkgreen;
+}
+
+.ts-background-color-plus-light {
+    background-color: seagreen;
+}
+
+.ts-background-color-minus {
+    background-color: darkred;
+}
+
+.ts-background-color-minus-light {
+    background-color: indianred;
+}
+
+.ts-background-color-zero {
+    background-color: inherit;
+}
+
+.ts-background-color-info {
+    background-color: orangered;
+}
+
+.ts-border-neutral {
+    border-style: solid;
+    border-color: orangered;
+    border-width: 5px;
+}
+
+.ts-border-negative {
+    border-style: solid;
+    border-color: darkred;
+    border-width: 5px;
+}
+
+.ts-border-positive {
+    border-style: solid;
+    border-color: darkgreen;
+    border-width: 5px;
+}
+
+.ts-border-highlighted {
+    border-style: solid;
+    border-color: yellow;
+    border-width: 5px;
+}
+
+.ts-cursor-pointer {
+    cursor: pointer;
+}
+
+.ts-text-inactive {
+    color: gray;
+}
+
+.ts-text-highlighted-a {
+    color: yellow;
+}
+
+.ts-text-highlighted-b {
+    color: dodgerblue;
+    font-weight: bold;
+}
+
+.ts-text-highlighted-c {
+    color: deeppink;
+}

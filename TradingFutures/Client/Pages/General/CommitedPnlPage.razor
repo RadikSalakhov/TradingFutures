@@ -1,0 +1,54 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Client.Hubs;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Entities;
+@using TradingFutures.Shared;
+@using TradingFutures.Shared.Utils;
+
+@implements IDisposable
+
+@inject ICacheService ClientCache
+
+<div class="ts-container">
+    @{
+        var serverStatus = ClientCache.ServerStatus.Get();
+        var dayPnl = serverStatus.CommitedDayPnl;
+        var monthPnl = serverStatus.CommitedMonthPnl;
+        var yearPnl = serverStatus.CommitedYearPnl;
+
+        var dayPnlClass = dayPnl >= 0m ? "ts-item ts-item-pnl-day ts-background-color-plus" : "ts-item ts-item-pnl-day ts-background-color-minus";
+        var monthPnlClass = monthPnl >= 0m ? "ts-item ts-item-pnl-month ts-background-color-plus" : "ts-item ts-item-pnl-month ts-background-color-minus";
+        var yearPnlClass = yearPnl >= 0m ? "ts-item ts-item-pnl-year ts-background-color-plus" : "ts-item ts-item-pnl-year ts-background-color-minus";
+
+        <div class="@dayPnlClass">
+            @CommonUtilities.ToDefaultString(dayPnl, decimals: 2, includeSign: true)
+        </div>
+
+        <div class="@monthPnlClass">
+            @CommonUtilities.ToDefaultString(monthPnl, decimals: 2, includeSign: true)
+        </div>
+
+        <div class="@yearPnlClass">
+            @CommonUtilities.ToDefaultString(yearPnl, decimals: 2, includeSign: true)
+        </div>
+    }
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ClientCache.ServerStatus.Updated += serverStatus_Updated;
+    }
+
+    public void Dispose()
+    {   
+        ClientCache.ServerStatus.Updated -= serverStatus_Updated;
+    }   
+
+    private async Task serverStatus_Updated(IEnumerable<ServerStatusEntity> serverStatus)
+    {
+        await InvokeAsync(StateHasChanged);
+    }    
+}

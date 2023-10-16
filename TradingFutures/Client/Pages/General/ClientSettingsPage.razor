@@ -1,0 +1,127 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Client.Services;
+@using TradingFutures.Shared.Data;
+@using TradingFutures.Shared.Entities;
+
+@implements IDisposable
+
+@inject IClientSettingsService ClientSettings
+
+<div class="ts-container">
+    <div class="ts-item-is-short-mode ts-cursor-pointer" onclick=@btnIsShortMode_Clicked>
+        @getIsShortModeText()
+    </div>   
+    <div class="ts-item-sort-direction ts-cursor-pointer" onclick=@btnSortDirection_Clicked>
+        @if (ClientSettings.SortDirection.Value == SortDirection.ASC)
+        {
+            <i class="fa-solid fa-arrow-up-short-wide" />
+        }
+        else if (ClientSettings.SortDirection.Value == SortDirection.DESC)
+        {
+            <i class="fa-solid fa-arrow-down-wide-short" />
+        }
+        else
+        {
+            <div class="ts-item-sort-direction-az">
+                <i class="fa-solid fa-a" />
+                <i class="fa-solid fa-z" />
+            </div>
+        }
+    </div>
+    <div class="ts-item-sort-mode ts-cursor-pointer" onclick=@btnSortMode_Clicked>
+        @if (ClientSettings.SortMode.Value == SortMode.PNL_NORMALIZED)
+        {
+            <i class="fa-solid fa-n" />
+        }
+        else
+        {
+            <i class="fa-solid fa-n ts-text-inactive" />
+        }
+    </div>
+    <div class="ts-item-freeze-sort ts-cursor-pointer" onclick=@btnFreezeSort_Clicked>
+        @if (ClientSettings.FreezeSort.Value)
+        {
+            <i class="fa-solid fa-snowflake"></i>            
+        }
+        else
+        {
+            <i class="fa-solid fa-snowflake ts-text-inactive"></i>            
+        }
+    </div>    
+    <div class="ts-item-show-info ts-cursor-pointer" onclick=@btnShowInfo_Clicked>
+        @if (ClientSettings.ShowInfo.Value)
+        {
+            <i class="fa-solid fa-circle-info" />
+        }
+        else
+        {
+            <i class="fa-solid fa-circle-info ts-text-inactive" />
+        }        
+    </div>
+    <div class="ts-item-manual-mode-enabled ts-cursor-pointer" onclick=@btnManualModeEnabled_Clicked>
+        @if (ClientSettings.ManualModeEnabled.Value)
+        {
+            <i class="fa-solid fa-m"></i>
+        }
+        else
+        {
+            <i class="fa-solid fa-m ts-text-inactive"></i>
+        }
+    </div>
+</div>
+
+@code {
+    private string? PasswordValue;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ClientSettings.Updated += clientSettings_Updated;
+    }
+
+    public void Dispose()
+    {
+        ClientSettings.Updated -= clientSettings_Updated;
+    }
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task btnIsShortMode_Clicked()
+    {
+        await ClientSettings.IsShortMode.Toggle();
+    }   
+
+    private async Task btnSortDirection_Clicked()
+    {
+        await ClientSettings.SortDirection.ToggleSortDirection();
+    }
+
+    private async Task btnSortMode_Clicked()
+    {
+        await ClientSettings.SortMode.ToggleSortMode();
+    }
+
+    private async Task btnFreezeSort_Clicked()
+    {
+        await ClientSettings.FreezeSort.Toggle();
+    }
+
+    private async Task btnShowInfo_Clicked()
+    {
+        await ClientSettings.ShowInfo.Toggle();
+    }
+
+    private async Task btnManualModeEnabled_Clicked()
+    {
+        await ClientSettings.ManualModeEnabled.Toggle();
+    }
+
+    private string getIsShortModeText()
+    {
+        return ClientSettings.IsShortMode.Value ? "SHORT" : "LONG";
+    }
+}

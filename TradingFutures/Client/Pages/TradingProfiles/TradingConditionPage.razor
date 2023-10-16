@@ -1,0 +1,50 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Client.Pages.TradingProfiles.TradingConditions
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Data;
+@using TradingFutures.Shared.Entities;
+@using TradingFutures.Shared.Utils;
+
+@inject IClientSettingsService ClientSettings
+@inject ICacheService CacheService
+@inject ITradingClientService TradingClientService
+
+<div class="ts-container">
+    <div class="ts-item ts-item-slope-short">
+        <TradingConditionSlopeShortPage TradingCondition=TradingCondition />
+    </div>
+    <div class="ts-item ts-item-slope-long">
+        <TradingConditionSlopeLongPage TradingCondition=TradingCondition />
+    </div>
+    <div class="ts-item ts-item-cross-diff">
+        <TradingConditionCrossDiffPage TradingCondition=TradingCondition />
+    </div>
+    <div class="ts-item ts-item-price-diff-short">
+        <TradingConditionPriceDiffShortPage TradingCondition=TradingCondition />
+    </div>
+    <div class="ts-item ts-item-price-diff-long">
+        <TradingConditionPriceDiffLongPage TradingCondition=TradingCondition />
+    </div>
+</div>
+
+@code{
+    [Parameter]
+    public TradingConditionEntity TradingCondition { get; set; } = new TradingConditionEntity();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ClientSettings.Updated += clientSettings_Updated;        
+    }
+
+    public void Dispose()
+    {
+        ClientSettings.Updated -= clientSettings_Updated;        
+    }
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }  
+}

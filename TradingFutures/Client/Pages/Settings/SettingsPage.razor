@@ -1,0 +1,181 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Data;
+@using TradingFutures.Shared.Entities;
+@using TradingFutures.Shared.Utils;
+
+@implements IDisposable
+
+@inject IClientSettingsService ClientSettings
+@inject ICacheService ClientCache
+@inject ITradingClientService TradingClient
+
+<div class="ts-container">
+    <div class="ts-item telegram-notifications-header">TELEGRAM</div>
+    <div class="@getItemClass("telegram-notifications-value", isButton: true, highlightDefault: ServerSettings.TelegramNotificationsEnabled)" onclick=@btnTelegramNotificationsEnabled_Clicked>
+        <i class="fa-brands fa-telegram" />
+    </div>
+    <div class="ts-item ts-item-min-pnl-header">Min PNL</div>
+    <div class="@getItemClass("min-pnl-value")">
+        <i class="fa-solid fa-chevron-left ts-cursor-pointer" onclick="@(async () => await btnMinPnlPercent_Clicked(incrementUp: false))" />
+        <span>
+            @CommonUtilities.ToDefaultString(ServerSettings.MinPnl, decimals: 1)
+        </span>
+        <i class="fa-solid fa-chevron-right ts-cursor-pointer" onclick="@(async () => await btnMinPnlPercent_Clicked(incrementUp: true))" />
+    </div>
+    <div class="ts-item ts-item-max-steps-diff-header">Max Steps Diff</div>
+    <div class="@getItemClass("max-steps-diff-value")">
+        <i class="fa-solid fa-chevron-left ts-cursor-pointer" onclick="@(async () => await btnMaxStepsDiff_Clicked(incrementUp: false))" />
+        <span>
+            @CommonUtilities.ToDefaultString(ServerSettings.MaxStepsDiff, decimals: 0)
+        </span>
+        <i class="fa-solid fa-chevron-right ts-cursor-pointer" onclick="@(async () => await btnMaxStepsDiff_Clicked(incrementUp: true))" />
+    </div>
+    <div class="ts-item ts-item-autobuy-threshold-min-header">Autobuy Thr. Min</div>
+    <div class="@getItemClass("autobuy-threshold-min-value")">
+        <i class="fa-solid fa-chevron-left ts-cursor-pointer" onclick="@(async () => await btnAutoBuyThresholdMin_Clicked(incrementUp: false))" />
+        <span>
+            @CommonUtilities.ToCurrencyString(ServerSettings.AutoBuyThresholdMin, decimals: 1)
+        </span>
+        <i class="fa-solid fa-chevron-right ts-cursor-pointer" onclick="@(async () => await btnAutoBuyThresholdMin_Clicked(incrementUp: true))" />
+    </div>
+    <div class="ts-item ts-item-autobuy-threshold-max-header">Autobuy Thr. Max</div>
+    <div class="@getItemClass("autobuy-threshold-max-value")">
+        <i class="fa-solid fa-chevron-left ts-cursor-pointer" onclick="@(async () => await btnAutoBuyThresholdMax_Clicked(incrementUp: false))" />
+        <span>
+            @CommonUtilities.ToCurrencyString(ServerSettings.AutoBuyThresholdMax, decimals: 1)
+        </span>
+        <i class="fa-solid fa-chevron-right ts-cursor-pointer" onclick="@(async () => await btnAutoBuyThresholdMax_Clicked(incrementUp: true))" />
+    </div>
+    <div class="ts-item-trading-strategy-header">Strategy</div>
+    <div class="ts-item-trading-strategy-value">
+        <div class="ts-item-btn" onclick="@(async () => await btnStrategy_Clicked(incrementUp: false))">
+            <i class="fa-solid fa-chevron-left" />
+        </div>
+        <div>
+            <span>
+                @ServerSettings.GetTradingStrategyTypeShortName()
+            </span>
+        </div>
+        <div class="ts-item-btn" onclick="@(async () => await btnStrategy_Clicked(incrementUp: true))">
+            <i class="fa-solid fa-chevron-right" />
+        </div>
+    </div>
+    <div class="ts-item-trading-profile-header">Profile</div>
+    <div class="ts-item-trading-profile-value">
+        <div class="ts-item-btn" onclick="@(async () => await btnProfile_Clicked(incrementUp: false))">
+            <i class="fa-solid fa-chevron-left" />
+        </div>
+        <div>
+            <span>
+                @ServerSettings.GetTradingProfileIdShortName()
+            </span>
+        </div>
+        <div class="ts-item-btn" onclick="@(async () => await btnProfile_Clicked(incrementUp: true))">
+            <i class="fa-solid fa-chevron-right" />
+        </div>
+    </div>    
+    <div class="ts-item ts-item-version-header">Version</div>
+    <div class="ts-item ts-item-version-value">@getVersionText()</div>    
+</div>
+
+@code{    
+
+    private ServerSettingsEntity ServerSettings => ClientCache.ServerSettings.Get();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ClientSettings.Updated += clientSettings_Updated;
+
+        ClientCache.ServerStatus.Updated += serverStatus_Updated;
+    }
+
+    public void Dispose()
+    {
+        ClientSettings.Updated -= clientSettings_Updated;        
+
+        ClientCache.ServerStatus.Updated -= serverStatus_Updated;
+    }
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task serverStatus_Updated(IEnumerable<ServerStatusEntity> serverTime)
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task btnTelegramNotificationsEnabled_Clicked()
+    {
+        var serverSettings = ServerSettings.GetCopy();
+        serverSettings.TelegramNotificationsEnabled = !serverSettings.TelegramNotificationsEnabled;
+        await TradingClient.UpdateServerSettings(serverSettings);
+    }
+
+    private async Task btnMinPnlPercent_Clicked(bool incrementUp)
+    {
+        var serverSettings = ServerSettings.GetCopy();
+        serverSettings.IncrementMinPnlCoeff(incrementUp: incrementUp);
+        await TradingClient.UpdateServerSettings(serverSettings);
+    }
+
+    private async Task btnMaxStepsDiff_Clicked(bool incrementUp)
+    {
+        var serverSettings = ServerSettings.GetCopy();
+        serverSettings.IncrementMaxStepsDiff(incrementUp: incrementUp);
+        await TradingClient.UpdateServerSettings(serverSettings);
+    }
+
+    private async Task btnAutoBuyThresholdMin_Clicked(bool incrementUp)
+    {
+        var serverSettings = ServerSettings.GetCopy();
+        serverSettings.IncrementAutoBuyThresholdMin(incrementUp: incrementUp);
+        await TradingClient.UpdateServerSettings(serverSettings);
+    }
+
+    private async Task btnAutoBuyThresholdMax_Clicked(bool incrementUp)
+    {
+        var serverSettings = ServerSettings.GetCopy();
+        serverSettings.IncrementAutoBuyThresholdMax(incrementUp: incrementUp);
+        await TradingClient.UpdateServerSettings(serverSettings);
+    }
+
+    private async Task btnStrategy_Clicked(bool incrementUp)
+    {
+        var serverSettings = ServerSettings.GetCopy();
+        serverSettings.IncrementTradingBotStrategy(incrementUp);
+        await TradingClient.UpdateServerSettings(serverSettings);
+    }    
+
+    private async Task btnProfile_Clicked(bool incrementUp)
+    {
+        var serverSettings = ServerSettings.GetCopy();
+        serverSettings.IncrementTradingProfile(incrementUp);
+        await TradingClient.UpdateServerSettings(serverSettings);
+    }   
+
+    private string getVersionText()
+    {
+        var version = typeof(Program).Assembly.GetName().Version ?? new Version(0, 0, 0, 0);
+        return $"{version.Major}.{version.Minor}.{version.Build}";
+    }
+
+    private string getItemClass(string name, bool isButton = false, bool? highlightDefault = null, bool? highlightA = null, bool? highlightB = null)
+    {
+        var btnClass = isButton ? "ts-item-btn" : string.Empty;
+
+        var highlightClass = string.Empty;
+        if (highlightDefault.HasValue)
+            highlightClass = highlightDefault.Value ? string.Empty : "ts-text-inactive";
+        if (highlightA.HasValue)
+            highlightClass = highlightA.Value ? "ts-text-highlighted-a" : "ts-text-inactive";
+        if (highlightB.HasValue)
+            highlightClass = highlightB.Value ? "ts-text-highlighted-b" : "ts-text-inactive";
+
+        return $"ts-item ts-item-{name} {btnClass} {highlightClass}";
+    }   
+}

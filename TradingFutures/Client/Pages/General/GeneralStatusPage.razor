@@ -1,0 +1,110 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Client.Hubs;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Entities;
+@using TradingFutures.Shared;
+@using TradingFutures.Shared.Utils;
+
+@implements IDisposable
+
+@inject IHubClient HubClient
+@inject IClientSettingsService ClientSettings
+@inject ICacheService ClientCache
+
+<div class="ts-container">    
+    <div class="@getEnvironmentClass()">@getEnvironmentText()</div>
+    @if (HubClient.IsConnected)
+    {
+        <div class="ts-item ts-item-time">
+            @ServerStatus.ServerTime.ToString("HH:mm:ss")
+        </div>
+    }
+    else
+    {
+        <div class="ts-item ts-item-time ts-item-time-timeout">
+            CON.LOST
+        </div>
+    }
+
+    @{
+        var pnlLong = ClientCache.TradingPosition.GetTotalPnlLong();
+        var pnlShort = ClientCache.TradingPosition.GetTotalPnlShort();
+        var pnlTotal = pnlLong + pnlShort;
+
+        var currentUsdtLong = ClientCache.TradingPosition.GetCurrentUSDTLong();
+        var currentUsdtShort = ClientCache.TradingPosition.GetCurrentUSDTShort();
+
+        var pnlLongClass = pnlLong >= 0m ? "ts-item ts-item-pnl-long ts-background-color-plus" : "ts-item ts-item-pnl-long ts-background-color-minus";
+        var pnlShortClass = pnlShort >= 0m ? "ts-item ts-item-pnl-short ts-background-color-plus" : "ts-item ts-item-pnl-short ts-background-color-minus";
+        var pnlTotalClass = pnlTotal >= 0m ? "ts-item ts-item-pnl-total ts-background-color-plus" : "ts-item ts-item-pnl-total ts-background-color-minus";
+
+        <div class="@pnlLongClass">
+            @getPnlText(pnlLong, currentUsdtLong)            
+        </div>
+        <div class="@pnlShortClass">
+            @getPnlText(pnlShort, currentUsdtShort)
+        </div>
+        <div class="@pnlTotalClass">
+            @CommonUtilities.ToDefaultString(pnlTotal, 2, true)
+        </div>
+    }
+</div>
+
+@code {
+    private ServerStatusEntity ServerStatus => ClientCache.ServerStatus.Get();    
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        HubClient.StateChanged += hubClient_StateChanged;
+
+        ClientSettings.Updated += clientSettings_Updated;
+
+        ClientCache.ServerStatus.Updated += serverStatus_Updated;
+    }
+
+    public void Dispose()
+    {
+        HubClient.StateChanged -= hubClient_StateChanged;
+
+        ClientSettings.Updated -= clientSettings_Updated;
+
+        ClientCache.ServerStatus.Updated -= serverStatus_Updated;
+    }
+
+    private async Task hubClient_StateChanged()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task serverStatus_Updated(IEnumerable<ServerStatusEntity> serverStatus)
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private string getEnvironmentClass()
+    {
+        return ServerStatus.IsProduction
+        ? "ts-item ts-item-environment ts-item-environment-prd"
+        : "ts-item ts-item-environment ts-item-environment-dev";
+    }
+
+    private string getEnvironmentText()
+    {
+        return ServerStatus.IsProduction ? "PRD" : "DEV";
+    }
+
+    private string getPnlText(decimal pnl, decimal currentUSDT)
+    {
+        if (ClientSettings.WindowSize.IsDesktop)
+            return $"{CommonUtilities.ToDefaultString(pnl, decimals: 2,  includeSign: true)} / {CommonUtilities.ToDefaultString(currentUSDT, decimals: 0)}";
+        else
+            return CommonUtilities.ToDefaultString(pnl, decimals: 2, includeSign: true);
+    }
+}

@@ -1,0 +1,56 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Data;
+@using TradingFutures.Shared.Entities;
+
+@inject IClientSettingsService ClientSettings
+@inject ICacheService ClientCache
+
+<div class="ts-container">
+    <div class="ts-item ts-item-header-info">        
+        @TradingProfile.TradingProfileId
+    </div>
+    <div class="ts-item ts-item-header-buy">
+        BUY
+    </div>
+    <div class="ts-item ts-item-header-sell">
+        SELL PROFIT
+    </div>
+    <div class="ts-item ts-item-header-forced-sell">
+        SELL FORCED
+    </div>    
+    <div class="ts-item ts-item-info">
+        <TradingHeadersPage />
+    </div>    
+    <div class="ts-item ts-item-buy">
+        <TradingConditionsContainerPage TradingProfile=TradingProfile Type=TradingConditionType.BUY />
+    </div>
+    <div class="ts-item ts-item-sell">
+        <TradingConditionsContainerPage TradingProfile=TradingProfile Type=TradingConditionType.SELL_PROFIT />
+    </div>
+    <div class="ts-item ts-item-forced-sell">
+        <TradingConditionsContainerPage TradingProfile=TradingProfile Type=TradingConditionType.SELL_LOSSES />
+    </div>
+</div>
+
+@code{
+    [Parameter]
+    public TradingProfileEntity TradingProfile { get; set; } = new TradingProfileEntity();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ClientSettings.Updated += clientSettings_Updated;        
+    }
+
+    public void Dispose()
+    {
+        ClientSettings.Updated -= clientSettings_Updated;        
+    }
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }    
+}

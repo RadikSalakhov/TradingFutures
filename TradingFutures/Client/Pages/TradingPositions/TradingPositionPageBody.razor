@@ -1,0 +1,616 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Data;
+@using TradingFutures.Shared.Entities;
+
+@implements IDisposable
+
+@inject IClientSettingsService ClientSettings
+@inject ICacheService ClientCache
+
+@{    
+    var emaCross_1S = ClientCache.EmaCross.GetByKeys(Asset, TradingInterval.Interval_1S) ?? EmaCrossEntity.Create(Asset, TradingInterval.Interval_1S);
+    var emaCross_1M = ClientCache.EmaCross.GetByKeys(Asset, TradingInterval.Interval_1M) ?? EmaCrossEntity.Create(Asset, TradingInterval.Interval_1M);
+    var emaCross_5M = ClientCache.EmaCross.GetByKeys(Asset, TradingInterval.Interval_5M) ?? EmaCrossEntity.Create(Asset, TradingInterval.Interval_5M);
+    var emaCross_15M = ClientCache.EmaCross.GetByKeys(Asset, TradingInterval.Interval_15M) ?? EmaCrossEntity.Create(Asset, TradingInterval.Interval_15M);
+    var emaCross_30M = ClientCache.EmaCross.GetByKeys(Asset, TradingInterval.Interval_30M) ?? EmaCrossEntity.Create(Asset, TradingInterval.Interval_30M);
+    var emaCross_1H = ClientCache.EmaCross.GetByKeys(Asset, TradingInterval.Interval_1H) ?? EmaCrossEntity.Create(Asset, TradingInterval.Interval_1H);
+    var emaCross_4H = ClientCache.EmaCross.GetByKeys(Asset, TradingInterval.Interval_4H) ?? EmaCrossEntity.Create(Asset, TradingInterval.Interval_4H);
+    var emaCross_12H = ClientCache.EmaCross.GetByKeys(Asset, TradingInterval.Interval_12H) ?? EmaCrossEntity.Create(Asset, TradingInterval.Interval_12H);
+        
+    var slopeShortTrendUp_1S = emaCross_1S?.SlopeShortTrendUp;
+    var slopeShortTrendUp_1M = emaCross_1M?.SlopeShortTrendUp;
+    var slopeShortTrendUp_5M = emaCross_5M?.SlopeShortTrendUp;
+    var slopeShortTrendUp_15M = emaCross_15M?.SlopeShortTrendUp;
+    var slopeShortTrendUp_30M = emaCross_30M?.SlopeShortTrendUp;
+    var slopeShortTrendUp_1H = emaCross_1H?.SlopeShortTrendUp;
+    var slopeShortTrendUp_4H = emaCross_4H?.SlopeShortTrendUp;
+    var slopeShortTrendUp_12H = emaCross_12H?.SlopeShortTrendUp;
+        
+    var slopeLongTrendUp_1S = emaCross_1S?.SlopeLongTrendUp;
+    var slopeLongTrendUp_1M = emaCross_1M?.SlopeLongTrendUp;
+    var slopeLongTrendUp_5M = emaCross_5M?.SlopeLongTrendUp;
+    var slopeLongTrendUp_15M = emaCross_15M?.SlopeLongTrendUp;
+    var slopeLongTrendUp_30M = emaCross_30M?.SlopeLongTrendUp;
+    var slopeLongTrendUp_1H = emaCross_1H?.SlopeLongTrendUp;
+    var slopeLongTrendUp_4H = emaCross_4H?.SlopeLongTrendUp;
+    var slopeLongTrendUp_12H = emaCross_12H?.SlopeLongTrendUp;
+        
+    var slopeShort_1S = emaCross_1S?.GetSlopeShortCoeff() ?? 0m;
+    var slopeShort_1M = emaCross_1M?.GetSlopeShortCoeff() ?? 0m;
+    var slopeShort_5M = emaCross_5M?.GetSlopeShortCoeff() ?? 0m;
+    var slopeShort_15M = emaCross_15M?.GetSlopeShortCoeff() ?? 0m;
+    var slopeShort_30M = emaCross_30M?.GetSlopeShortCoeff() ?? 0m;
+    var slopeShort_1H = emaCross_1H?.GetSlopeShortCoeff() ?? 0m;
+    var slopeShort_4H = emaCross_4H?.GetSlopeShortCoeff() ?? 0m;
+    var slopeShort_12H = emaCross_12H?.GetSlopeShortCoeff() ?? 0m;
+        
+    var slopeLong_1S = emaCross_1S?.GetSlopeLongCoeff() ?? 0m;
+    var slopeLong_1M = emaCross_1M?.GetSlopeLongCoeff() ?? 0m;
+    var slopeLong_5M = emaCross_5M?.GetSlopeLongCoeff() ?? 0m;
+    var slopeLong_15M = emaCross_15M?.GetSlopeLongCoeff() ?? 0m;    
+    var slopeLong_30M = emaCross_30M?.GetSlopeLongCoeff() ?? 0m;
+    var slopeLong_1H = emaCross_1H?.GetSlopeLongCoeff() ?? 0m;
+    var slopeLong_4H = emaCross_4H?.GetSlopeLongCoeff() ?? 0m;
+    var slopeLong_12H = emaCross_12H?.GetSlopeLongCoeff() ?? 0m;
+        
+    var crossDiff_1S = emaCross_1S?.GetCrossDiffCoeff() ?? 0m;
+    var crossDiff_1M = emaCross_1M?.GetCrossDiffCoeff() ?? 0m;
+    var crossDiff_5M = emaCross_5M?.GetCrossDiffCoeff() ?? 0m;
+    var crossDiff_15M = emaCross_15M?.GetCrossDiffCoeff() ?? 0m;
+    var crossDiff_30M = emaCross_30M?.GetCrossDiffCoeff() ?? 0m;
+    var crossDiff_1H = emaCross_1H?.GetCrossDiffCoeff() ?? 0m;
+    var crossDiff_4H = emaCross_4H?.GetCrossDiffCoeff() ?? 0m;
+    var crossDiff_12H = emaCross_12H?.GetCrossDiffCoeff() ?? 0m;
+        
+    var priceShortDiff_1S = emaCross_1S?.GetPriceDiffShortCoeff(AssetPrice) ?? 0m;
+    var priceShortDiff_1M = emaCross_1M?.GetPriceDiffShortCoeff(AssetPrice) ?? 0m;
+    var priceShortDiff_5M = emaCross_5M?.GetPriceDiffShortCoeff(AssetPrice) ?? 0m;
+    var priceShortDiff_15M = emaCross_15M?.GetPriceDiffShortCoeff(AssetPrice) ?? 0m;
+    var priceShortDiff_30M = emaCross_30M?.GetPriceDiffShortCoeff(AssetPrice) ?? 0m;
+    var priceShortDiff_1H = emaCross_1H?.GetPriceDiffShortCoeff(AssetPrice) ?? 0m;
+    var priceShortDiff_4H = emaCross_4H?.GetPriceDiffShortCoeff(AssetPrice) ?? 0m;
+    var priceShortDiff_12H = emaCross_12H?.GetPriceDiffShortCoeff(AssetPrice) ?? 0m;
+        
+    var priceLongDiff_1S = emaCross_1S?.GetPriceDiffLongCoeff(AssetPrice) ?? 0m;
+    var priceLongDiff_1M = emaCross_1M?.GetPriceDiffLongCoeff(AssetPrice) ?? 0m;
+    var priceLongDiff_5M = emaCross_5M?.GetPriceDiffLongCoeff(AssetPrice) ?? 0m;
+    var priceLongDiff_15M = emaCross_15M?.GetPriceDiffLongCoeff(AssetPrice) ?? 0m;
+    var priceLongDiff_30M = emaCross_30M?.GetPriceDiffLongCoeff(AssetPrice) ?? 0m;
+    var priceLongDiff_1H = emaCross_1H?.GetPriceDiffLongCoeff(AssetPrice) ?? 0m;
+    var priceLongDiff_4H = emaCross_4H?.GetPriceDiffLongCoeff(AssetPrice) ?? 0m;
+    var priceLongDiff_12H = emaCross_12H?.GetPriceDiffLongCoeff(AssetPrice) ?? 0m;
+}
+
+<div class="ts-container">
+    @*slope-short*@    
+    <div class="ts-item ts-item-slope-short-1s" style="@getParametersSlopeShort(slopeShort_1S, TradingInterval.Interval_1S)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeShort_1S)
+            @if (validateSlopeTrendShort(slopeShortTrendUp_1S, TradingInterval.Interval_1S) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeShortTrendUp_1S)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeShortTrendUp_1S)" />
+            }
+        </div>
+    </div>
+    <div class="ts-item ts-item-slope-short-1m" style="@getParametersSlopeShort(slopeShort_1M, TradingInterval.Interval_1M)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeShort_1M)
+            @if (validateSlopeTrendShort(slopeShortTrendUp_1M, TradingInterval.Interval_1M) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeShortTrendUp_1M)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeShortTrendUp_1M)" />
+            }            
+        </div>
+    </div>
+    <div class="ts-item ts-item-slope-short-5m" style="@getParametersSlopeShort(slopeShort_5M, TradingInterval.Interval_5M)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeShort_5M)
+            @if (validateSlopeTrendShort(slopeShortTrendUp_5M, TradingInterval.Interval_5M) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeShortTrendUp_5M)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeShortTrendUp_5M)" />
+            }            
+        </div>
+    </div>
+    <div class="ts-item ts-item-slope-short-15m" style="@getParametersSlopeShort(slopeShort_15M, TradingInterval.Interval_15M)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeShort_15M)            
+            @if (validateSlopeTrendShort(slopeShortTrendUp_15M, TradingInterval.Interval_15M) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeShortTrendUp_15M)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeShortTrendUp_15M)" />
+            }
+        </div>
+    </div>
+    <div class="ts-item ts-item-slope-short-30m" style="@getParametersSlopeShort(slopeShort_30M, TradingInterval.Interval_30M)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeShort_30M)            
+            @if (validateSlopeTrendShort(slopeShortTrendUp_30M, TradingInterval.Interval_30M) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeShortTrendUp_30M)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeShortTrendUp_30M)" />
+            }
+        </div>
+    </div>
+    <div class="ts-item ts-item-slope-short-1h" style="@getParametersSlopeShort(slopeShort_1H, TradingInterval.Interval_1H)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeShort_1H)            
+            @if (validateSlopeTrendShort(slopeShortTrendUp_1H, TradingInterval.Interval_1H) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeShortTrendUp_1H)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeShortTrendUp_1H)" />
+            }
+        </div>
+    </div>
+    <div class="ts-item ts-item-slope-short-4h" style="@getParametersSlopeShort(slopeShort_4H, TradingInterval.Interval_4H)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeShort_4H)            
+            @if (validateSlopeTrendShort(slopeShortTrendUp_4H, TradingInterval.Interval_4H) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeShortTrendUp_4H)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeShortTrendUp_4H)" />
+            }
+        </div>
+    </div>
+    <div class="ts-item ts-item-slope-short-12h" style="@getParametersSlopeShort(slopeShort_12H, TradingInterval.Interval_12H)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeShort_12H)            
+            @if (validateSlopeTrendShort(slopeShortTrendUp_12H, TradingInterval.Interval_12H) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeShortTrendUp_12H)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeShortTrendUp_12H)" />
+            }
+        </div>
+    </div>
+    @*slope-long*@    
+    <div class="ts-item ts-item-slope-long-1s" style="@getParametersSlopeLong(slopeLong_1S, TradingInterval.Interval_1S)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeLong_1S)            
+            @if (validateSlopeTrendLong(slopeLongTrendUp_1S, TradingInterval.Interval_1S) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeLongTrendUp_1S)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeLongTrendUp_1S)" />
+            }
+        </div>
+    </div>
+    <div class="ts-item ts-item-slope-long-1m" style="@getParametersSlopeLong(slopeLong_1M, TradingInterval.Interval_1M)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeLong_1M)            
+            @if (validateSlopeTrendLong(slopeLongTrendUp_1M, TradingInterval.Interval_1M) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeLongTrendUp_1M)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeLongTrendUp_1M)" />
+            }
+        </div>
+    </div>
+    <div class="ts-item ts-item-slope-long-5m" style="@getParametersSlopeLong(slopeLong_5M, TradingInterval.Interval_5M)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeLong_5M)            
+            @if (validateSlopeTrendLong(slopeLongTrendUp_5M, TradingInterval.Interval_5M) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeLongTrendUp_5M)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeLongTrendUp_5M)" />
+            }
+        </div>
+    </div>
+    <div class="ts-item ts-item-slope-long-15m" style="@getParametersSlopeLong(slopeLong_15M, TradingInterval.Interval_15M)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeLong_15M)            
+            @if (validateSlopeTrendLong(slopeLongTrendUp_15M, TradingInterval.Interval_15M) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeLongTrendUp_15M)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeLongTrendUp_15M)" />
+            }
+        </div>
+    </div>
+    <div class="ts-item ts-item-slope-long-30m" style="@getParametersSlopeLong(slopeLong_30M, TradingInterval.Interval_30M)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeLong_30M)            
+            @if (validateSlopeTrendLong(slopeLongTrendUp_30M, TradingInterval.Interval_30M) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeLongTrendUp_30M)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeLongTrendUp_30M)" />
+            }
+        </div>
+    </div>
+    <div class="ts-item ts-item-slope-long-1h" style="@getParametersSlopeLong(slopeLong_1H, TradingInterval.Interval_1H)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeLong_1H)            
+            @if (validateSlopeTrendLong(slopeLongTrendUp_1H, TradingInterval.Interval_1H) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeLongTrendUp_1H)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeLongTrendUp_1H)" />
+            }
+        </div>
+    </div>
+    <div class="ts-item ts-item-slope-long-4h" style="@getParametersSlopeLong(slopeLong_4H, TradingInterval.Interval_4H)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeLong_4H)            
+            @if (validateSlopeTrendLong(slopeLongTrendUp_4H, TradingInterval.Interval_4H) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeLongTrendUp_4H)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeLongTrendUp_4H)" />
+            }
+        </div>
+    </div>
+    <div class="ts-item ts-item-slope-long-12h" style="@getParametersSlopeLong(slopeLong_12H, TradingInterval.Interval_12H)">
+        <div class="ts-item ts-item-trend">
+            @getPromilleStr(slopeLong_12H)            
+            @if (validateSlopeTrendLong(slopeLongTrendUp_12H, TradingInterval.Interval_12H) == false)
+            {
+                <i class="fa-solid fa-minus" />
+                <i class="@getTrendClass(slopeLongTrendUp_12H)" />
+                <i class="fa-solid fa-minus" />
+            }
+            else
+            {
+                <i class="@getTrendClass(slopeLongTrendUp_12H)" />
+            }
+        </div>
+    </div>
+    @*cross-diff*@    
+    <div class="ts-item ts-item-cross-diff-1s" style="@getParametersCrossDiff(crossDiff_1S, TradingInterval.Interval_1S)">
+        @getPromilleStr(crossDiff_1S)
+    </div>
+    <div class="ts-item ts-item-cross-diff-1m" style="@getParametersCrossDiff(crossDiff_1M, TradingInterval.Interval_1M)">
+        @getPromilleStr(crossDiff_1M)
+    </div>
+    <div class="ts-item ts-item-cross-diff-5m" style="@getParametersCrossDiff(crossDiff_5M, TradingInterval.Interval_5M)">
+        @getPromilleStr(crossDiff_5M)
+    </div>
+    <div class="ts-item ts-item-cross-diff-15m" style="@getParametersCrossDiff(crossDiff_15M, TradingInterval.Interval_15M)">
+        @getPromilleStr(crossDiff_15M)
+    </div>
+    <div class="ts-item ts-item-cross-diff-30m" style="@getParametersCrossDiff(crossDiff_30M, TradingInterval.Interval_30M)">
+        @getPromilleStr(crossDiff_30M)
+    </div>
+    <div class="ts-item ts-item-cross-diff-1h" style="@getParametersCrossDiff(crossDiff_1H, TradingInterval.Interval_1H)">
+        @getPromilleStr(crossDiff_1H)
+    </div>
+    <div class="ts-item ts-item-cross-diff-4h" style="@getParametersCrossDiff(crossDiff_4H, TradingInterval.Interval_4H)">
+        @getPromilleStr(crossDiff_4H)
+    </div>
+    <div class="ts-item ts-item-cross-diff-12h" style="@getParametersCrossDiff(crossDiff_12H, TradingInterval.Interval_12H)">
+        @getPromilleStr(crossDiff_12H)
+    </div>
+    @*price-short-diff*@    
+    <div class="ts-item ts-item-price-short-diff-1s" style="@getParametersPriceDiffShort(priceShortDiff_1S, TradingInterval.Interval_1S)">
+        @getPromilleStr(priceShortDiff_1S)
+    </div>
+    <div class="ts-item ts-item-price-short-diff-1m" style="@getParametersPriceDiffShort(priceShortDiff_1M, TradingInterval.Interval_1M)">
+        @getPromilleStr(priceShortDiff_1M)
+    </div>
+    <div class="ts-item ts-item-price-short-diff-5m" style="@getParametersPriceDiffShort(priceShortDiff_5M, TradingInterval.Interval_5M)">
+        @getPromilleStr(priceShortDiff_5M)
+    </div>
+    <div class="ts-item ts-item-price-short-diff-15m" style="@getParametersPriceDiffShort(priceShortDiff_15M, TradingInterval.Interval_15M)">
+        @getPromilleStr(priceShortDiff_15M)
+    </div>
+    <div class="ts-item ts-item-price-short-diff-30m" style="@getParametersPriceDiffShort(priceShortDiff_30M, TradingInterval.Interval_30M)">
+        @getPromilleStr(priceShortDiff_30M)
+    </div>
+    <div class="ts-item ts-item-price-short-diff-1h" style="@getParametersPriceDiffShort(priceShortDiff_1H, TradingInterval.Interval_1H)">
+        @getPromilleStr(priceShortDiff_1H)
+    </div>
+    <div class="ts-item ts-item-price-short-diff-4h" style="@getParametersPriceDiffShort(priceShortDiff_4H, TradingInterval.Interval_4H)">
+        @getPromilleStr(priceShortDiff_4H)
+    </div>
+    <div class="ts-item ts-item-price-short-diff-12h" style="@getParametersPriceDiffShort(priceShortDiff_12H, TradingInterval.Interval_12H)">
+        @getPromilleStr(priceShortDiff_12H)
+    </div>
+    @*price-long-diff*@    
+    <div class="ts-item ts-item-price-long-diff-1s" style="@getParametersPriceDiffLong(priceLongDiff_1S, TradingInterval.Interval_1S)">
+        @getPromilleStr(priceLongDiff_1S)
+    </div>
+    <div class="ts-item ts-item-price-long-diff-1m" style="@getParametersPriceDiffLong(priceLongDiff_1M, TradingInterval.Interval_1M)">
+        @getPromilleStr(priceLongDiff_1M)
+    </div>
+    <div class="ts-item ts-item-price-long-diff-5m" style="@getParametersPriceDiffLong(priceLongDiff_5M, TradingInterval.Interval_5M)">
+        @getPromilleStr(priceLongDiff_5M)
+    </div>
+    <div class="ts-item ts-item-price-long-diff-15m" style="@getParametersPriceDiffLong(priceLongDiff_15M, TradingInterval.Interval_15M)">
+        @getPromilleStr(priceLongDiff_15M)
+    </div>
+    <div class="ts-item ts-item-price-long-diff-30m" style="@getParametersPriceDiffLong(priceLongDiff_30M, TradingInterval.Interval_30M)">
+        @getPromilleStr(priceLongDiff_30M)
+    </div>
+    <div class="ts-item ts-item-price-long-diff-1h" style="@getParametersPriceDiffLong(priceLongDiff_1H, TradingInterval.Interval_1H)">
+        @getPromilleStr(priceLongDiff_1H)
+    </div>
+    <div class="ts-item ts-item-price-long-diff-4h" style="@getParametersPriceDiffLong(priceLongDiff_4H, TradingInterval.Interval_4H)">
+        @getPromilleStr(priceLongDiff_4H)
+    </div>
+    <div class="ts-item ts-item-price-long-diff-12h" style="@getParametersPriceDiffLong(priceLongDiff_12H, TradingInterval.Interval_12H)">
+        @getPromilleStr(priceLongDiff_12H)
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public string Asset { get; set; } = string.Empty;    
+
+    private ServerSettingsEntity ServerSettings => ClientCache.ServerSettings.Get();
+
+    private TradingOrderSide TradingOrderSide => ClientSettings.IsShortMode.GetTradingOrderSide();
+
+    private TradingPositionEntity TradingPosition => ClientCache.TradingPosition.GetTradingPositionOrDefault(TradingOrderSide, Asset);    
+
+    private decimal AssetPrice => TradingPosition?.LastPrice ?? 0m;    
+
+    protected override void OnInitialized()
+    {   
+        ClientSettings.Updated += clientSettings_Updated;
+
+        ClientCache.EmaCross.Updated += emaCross_Updated;
+    }
+
+    public void Dispose()
+    {
+        ClientSettings.Updated -= clientSettings_Updated;
+
+        ClientCache.EmaCross.Updated -= emaCross_Updated;
+
+    }
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task emaCross_Updated(IEnumerable<EmaCrossEntity> emaCrossEntities)
+    {
+        if (emaCrossEntities != null && emaCrossEntities.Any(v => v.Asset == Asset))
+            await InvokeAsync(StateHasChanged);
+    }
+
+    private string getTrendClass(bool? trendUp)
+    {
+        if (!trendUp.HasValue)
+            return string.Empty;
+
+        return trendUp.Value
+            ? "fa-solid fa-chevron-up"
+            : "fa-solid fa-chevron-up fa-rotate-180";
+    }
+
+    private string getPromilleStr(decimal coeff)
+    {
+        if (!ClientSettings.ShowInfo.Value)
+            return string.Empty;
+
+        return (coeff * 1000m).ToString("+0.000;-0.000");
+    }
+
+    private TradingConditionEntity? getTradingCondition(TradingInterval tradingInterval)
+    {
+        if (TradingPosition == null || TradingPosition.TradingPositionSettings == null)
+            return null;
+
+        string? tradingProfileId = null;
+        TradingConditionType? tradingConditionType = null;
+        if (TradingPosition.HasCoins())
+        {
+            if (TradingPosition.TradingPositionSettings.AssistantBuyEnabled == true)
+            {
+                tradingProfileId = TradingProfileId.ASSISTANT;
+                tradingConditionType = TradingConditionType.BUY;
+            }
+            else if (TradingPosition.TradingPositionSettings.AssistantSellEnabled == true)
+            {
+                tradingProfileId = TradingProfileId.ASSISTANT;
+                tradingConditionType = TradingConditionType.SELL_PROFIT;
+            }
+            else if (TradingPosition.IsPnlThreasholdReached(ServerSettings.MinPnl))
+            {
+                if (ServerSettings.TradingStrategyType == TradingStrategyType.STRATEGY_C && TradingPosition.TradingPositionSettings.EmaCrossLogicClose)
+                {
+                    tradingProfileId = TradingProfileId.STRATEGY_C_1M;
+                    tradingConditionType = TradingConditionType.SELL_PROFIT;
+                }
+                else
+                {
+                    tradingProfileId = ServerSettings.TradingProfileId;
+                    tradingConditionType = TradingConditionType.SELL_PROFIT;
+                }                
+            }
+            else if (TradingPosition.AutoBuyThresholdReached)
+            {
+                if (ServerSettings.TradingStrategyType == TradingStrategyType.STRATEGY_C && TradingPosition.TradingPositionSettings.EmaCrossLogicOpen)
+                {
+                    tradingProfileId = TradingProfileId.STRATEGY_C_1M;
+                    tradingConditionType = TradingConditionType.BUY;
+                }
+            }
+        }
+        else
+        {
+            tradingProfileId = ServerSettings.TradingProfileId;
+            tradingConditionType = TradingConditionType.BUY;
+        }        
+
+        if (string.IsNullOrWhiteSpace(tradingProfileId) || !tradingConditionType.HasValue)
+            return null;
+
+        var tradingProfile = ClientCache.TradingProfile.GetByKey(tradingProfileId);
+        var tradingCondition = tradingProfile?.TradingConditions
+            .Where(v =>
+                v.ConditionType == tradingConditionType.Value &&
+                v.Interval == tradingInterval)
+            .FirstOrDefault();
+
+        if (tradingCondition != null)
+        {
+            if (TradingPosition.IsLongPosition())
+                return tradingCondition;
+
+            if (TradingPosition.IsShortPosition())
+                return tradingCondition.GetCopyOpposite();
+        }
+
+        return null;
+    }
+
+    private string getParametersSlopeShort(decimal value, TradingInterval tradingInterval)
+    {
+        bool? isValid = null;
+        var tradingCondition = getTradingCondition(tradingInterval);
+        if (tradingCondition != null)        
+            isValid = tradingCondition.ValidateSlopeShortMode(value);
+        return getParameters(value, isValid);
+    }
+
+    private bool? validateSlopeTrendShort(bool? value, TradingInterval tradingInterval)
+    {
+        if (value == null)
+            return null;
+
+        var tradingCondition = getTradingCondition(tradingInterval);
+        return tradingCondition?.ValidateSlopeTrendShortMode(value);
+    }
+
+    private string getParametersSlopeLong(decimal value, TradingInterval tradingInterval)
+    {
+        bool? isValid = null;
+        var tradingCondition = getTradingCondition(tradingInterval);
+        if (tradingCondition != null)
+            isValid = tradingCondition.ValidateSlopeLongMode(value);
+        return getParameters(value, isValid);
+    }
+
+    private bool? validateSlopeTrendLong(bool? value, TradingInterval tradingInterval)
+    {
+        if (value == null)
+            return null;
+
+        var tradingCondition = getTradingCondition(tradingInterval);
+        return tradingCondition?.ValidateSlopeTrendLongMode(value);
+    }
+
+    private string getParametersCrossDiff(decimal value, TradingInterval tradingInterval)
+    {
+        bool? isValid = null;
+        var tradingCondition = getTradingCondition(tradingInterval);
+        if (tradingCondition != null)
+            isValid = tradingCondition.ValidateCrossDiffMode(value);
+        return getParameters(value, isValid);
+    }
+
+    private string getParametersPriceDiffShort(decimal value, TradingInterval tradingInterval)
+    {
+        bool? isValid = null;
+        var tradingCondition = getTradingCondition(tradingInterval);
+        if (tradingCondition != null)
+            isValid = tradingCondition.ValidatePriceDiffShortMode(value);
+        return getParameters(value, isValid);
+    }
+
+    private string getParametersPriceDiffLong(decimal value, TradingInterval tradingInterval)
+    {
+        bool? isValid = null;
+        var tradingCondition = getTradingCondition(tradingInterval);
+        if (tradingCondition != null)
+            isValid = tradingCondition.ValidatePriceDiffLongMode(value);
+        return getParameters(value, isValid);
+    }
+
+    private string getParameters(decimal value, bool? isValid)
+    {
+        string color;
+        if (value > 0)
+        {
+            if (isValid == false)
+                color = "#17462C";
+            else
+                color = "seagreen";
+        }
+        else if (value < 0)
+        {
+            if (isValid == false)
+                color = "#672E2E";                
+            else
+                color = "indianred";                
+        }
+        else
+            color = "transparent";
+
+        return $"--background-color:{color};";
+    }
+}

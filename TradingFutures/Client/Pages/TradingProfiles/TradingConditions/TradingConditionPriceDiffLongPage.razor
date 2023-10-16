@@ -1,0 +1,53 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Data;
+@using TradingFutures.Shared.Entities;
+@using TradingFutures.Shared.Utils;
+@using TradingFutures.Shared;
+
+@inherits TradingConditionBasePage
+
+<div class="ts-container ts-border-neutral">
+    @* main *@
+    <div class="ts-item ts-item-btn ts-item-main-up" onclick="@(async () => await BtnMain_Clicked(incrementUp: true))">
+        <i class="fa-solid fa-chevron-up" />
+    </div>
+    <div class="@GetItemClass("main",GetMain(TradingCondition))">
+        <i class="fa-solid @SwitchStringPlusMinusX(GetMain(TradingCondition))" />
+    </div>
+    <div class="ts-item ts-item-btn ts-item-main-down" onclick="@(async () => await BtnMain_Clicked(incrementUp: false))">
+        <i class="fa-solid fa-chevron-down" />
+    </div>    
+    @* threshold *@
+    <div class="ts-item ts-item-btn ts-item-threshold-up" onclick="@(async () => await BtnThreshold_Clicked(incrementPromile: 0.1M))">
+        <i class="fa-solid fa-chevron-up" />
+    </div>
+    <div class="@GetItemClass("threshold", GetThresholdPromile(TradingCondition))">
+        @CommonUtilities.ToDefaultString(GetThresholdPromile(TradingCondition), decimals: 1, includeSign: true)
+    </div>
+    <div class="ts-item ts-item-btn ts-item-threshold-down" onclick="@(async () => await BtnThreshold_Clicked(incrementPromile: -0.1M))">
+        <i class="fa-solid fa-chevron-down" />
+    </div>   
+</div>
+
+@code{
+    protected override short GetMain(TradingConditionEntity tradingCondition)
+    {
+        return tradingCondition.PriceDiffLongMode;
+    }
+
+    protected override void SetMain(TradingConditionEntity tradingCondition, short value)
+    {
+        tradingCondition.PriceDiffLongMode = value;
+    }    
+
+    protected override decimal GetThresholdPromile(TradingConditionEntity tradingCondition)
+    {
+        return tradingCondition.PriceDiffLongThreshold * 1000M;
+    }
+
+    protected override void SetThresholdPromile(TradingConditionEntity tradingCondition, decimal value)
+    {
+        tradingCondition.PriceDiffLongThreshold = value / 1000M;
+    }
+}

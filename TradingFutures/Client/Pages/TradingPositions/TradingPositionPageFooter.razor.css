@@ -1,0 +1,66 @@
+﻿.ts-container {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    grid-template-columns: 1fr 3fr 3fr 3fr 3fr;
+    grid-template-rows: 1fr;
+    justify-items: stretch;
+    align-items: stretch;
+    column-gap: 4px;
+    row-gap: 4px;
+}
+
+.ts-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ts-item-is-short-mode {
+    grid-column-start: 1;
+    grid-column-end: 2;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+
+.ts-item-coins {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+
+.ts-item-current-usdt {
+    grid-column-start: 3;
+    grid-column-end: 4;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+
+.ts-item-pnl {
+    grid-column-start: 4;
+    grid-column-end: 5;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+
+.ts-item-pnl-percent {
+    grid-column-start: 5;
+    grid-column-end: 6;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+
+.ts-item-last-transaction-price {
+    grid-column-start: 2;
+    grid-column-end: span 2;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}
+
+.ts-item-last-transaction-price-coeff {
+    grid-column-start: 4;
+    grid-column-end: span 2;
+    grid-row-start: 1;
+    grid-row-end: 2;
+}

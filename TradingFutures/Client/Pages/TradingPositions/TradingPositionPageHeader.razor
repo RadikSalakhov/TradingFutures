@@ -1,0 +1,218 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Shared.Abstraction;
+@using TradingFutures.Shared.Data;
+@using TradingFutures.Shared.Entities;
+@using TradingFutures.Shared;
+@using TradingFutures.Shared.Utils;
+
+@implements IDisposable
+
+@inject IClientSettingsService ClientSettings
+@inject ICacheService ClientCache
+@inject ITradingClientService TradingClient
+
+<div class="ts-container">    
+    @if (ClientSettings.ManualModeEnabled.Value)
+    {
+        <div class="@getItemClass("btn-plus", isButton: true)" onclick=@btnPlus_Clicked>
+            <i class="fa-solid fa-circle-plus" />
+        </div>
+        <div class="@getItemClass("btn-minus", isButton: true)" onclick=@btnMinus_Clicked>
+            <i class="fa-solid fa-circle-minus" />
+        </div>
+    }
+    else
+    {
+        <div class="@getItemClassAssistantBuy()" onclick=@btnAssistantBuy_Clicked>
+            <i class="fa-solid fa-a" />
+            <i class="fa-solid fa-b" />
+        </div>
+        <div class="@getItemClassAssistantSell()" onclick=@btnAssistantSell_Clicked>
+            <i class="fa-solid fa-a" />
+            <i class="fa-solid fa-s" />
+        </div>
+    }    
+    <div class="@getItemClass("steps-amount")">
+        @CommonUtilities.ToDefaultString(TradingPosition.GetStepsAmount(), decimals: 1)
+    </div>
+    <div class="@getItemClass("steps-amount-opposite", isInactive: true)">
+        @CommonUtilities.ToDefaultString(TradingPosition.OppositeOrderStepsAmount, decimals: 1)
+    </div>
+    <div class="@getItemClass("name")">
+        @Asset
+    </div>
+    <div class="@getItemClass("price")">
+        @CommonUtilities.ToCurrencyString(LastPrice)
+    </div>    
+    <div class="@getItemClass("ema-short-position-percentage")">
+        @CommonUtilities.ToPercentageString(getEmaShortPositionCoeff(), decimals: 0)
+    </div>
+    <div class="@getItemClassTradingBotEnabled()" onclick=@btnTradingBotEnabled_Clicked>
+        <i class="fa-solid fa-robot" />
+    </div>
+    <div class="@getItemClassEmaCrossLogicOpen()">
+        <i class="fa-solid fa-o" />
+    </div>
+    <div class="@getItemClassEmaCrossLogicClose()">
+        <i class="fa-solid fa-c" />
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Asset { get; set; } = string.Empty;    
+
+    private ServerSettingsEntity ServerSettings => ClientCache.ServerSettings.Get();
+
+    private TradingOrderSide TradingOrderSide => ClientSettings.IsShortMode.GetTradingOrderSide();
+
+    private TradingPositionEntity TradingPosition => ClientCache.TradingPosition.GetTradingPositionOrDefault(TradingOrderSide, Asset);
+
+    private decimal LastPrice => TradingPosition.LastPrice;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ClientSettings.Updated += clientSettings_Updated;
+
+        ClientCache.TradingPosition.Updated += tradingPosition_Updated;
+    }
+
+    public void Dispose()
+    {
+        ClientSettings.Updated -= clientSettings_Updated;
+
+        ClientCache.TradingPosition.Updated -= tradingPosition_Updated;
+    }
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task tradingPosition_Updated(IEnumerable<TradingPositionEntity> tradingPositionEntities)
+    {
+        if (tradingPositionEntities != null && tradingPositionEntities.Any(v => v.Asset == Asset))
+            await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task btnPlus_Clicked()
+    {
+        if (ClientSettings.IsShortMode.Value)
+            await TradingClient.OpenShort(Asset);
+        else
+            await TradingClient.OpenLong(Asset);
+    }
+
+    private async Task btnMinus_Clicked()
+    {
+        if (ClientSettings.IsShortMode.Value)
+            await TradingClient.CloseShort(Asset);
+        else
+            await TradingClient.CloseLong(Asset);
+    }
+
+    private async Task btnAssistantBuy_Clicked()
+    {
+        if (TradingPosition.TradingPositionSettings == null)
+            return;
+
+        var tpSettings = TradingPosition.TradingPositionSettings.GetCopy();
+        tpSettings.AssistantBuyEnabled = !tpSettings.AssistantBuyEnabled;
+        await TradingClient.UpdateTradingPositionSettings(tpSettings);
+    }
+
+    private async Task btnAssistantSell_Clicked()
+    {
+        if (TradingPosition.TradingPositionSettings == null)
+            return;
+
+        var tpSettings = TradingPosition.TradingPositionSettings.GetCopy();
+        tpSettings.AssistantSellEnabled = !tpSettings.AssistantSellEnabled;
+        await TradingClient.UpdateTradingPositionSettings(tpSettings);
+    }    
+
+    private async Task btnTradingBotEnabled_Clicked()
+    {
+        if (TradingPosition.TradingPositionSettings == null)
+            return;
+
+        var tpSettings = TradingPosition.TradingPositionSettings.GetCopy();
+        tpSettings.TradingBotEnabled = !tpSettings.TradingBotEnabled;
+        await TradingClient.UpdateTradingPositionSettings(tpSettings);
+    }
+
+    private decimal getEmaShortPositionCoeff()
+    {
+        var emaCross_1M = ClientCache.EmaCross.GetByKeys(Asset, TradingInterval.Interval_1M);
+        return emaCross_1M != null 
+            ? TradingPosition.GetEmaShortPositionCoeff(emaCross_1M)
+            : 0M;
+    }
+
+    private string getItemClass(string name, bool isButton = false, bool isInactive = false)
+    {
+        var extraClass = getExtraClass();
+
+        var btnClass = isButton ? "ts-item-btn" : string.Empty;
+        var inactiveClass = isInactive ? "ts-text-inactive" : string.Empty;
+
+        return $"ts-item {btnClass} ts-item-{name} {extraClass} {inactiveClass}";
+    }
+
+    private string getExtraClass()
+    {
+        if (!TradingPosition.HasCoins())
+            return "ts-background-color-zero";
+
+        return TradingPosition.IsPnlThreasholdReached(ServerSettings.MinPnl)
+            ? "ts-background-color-plus"
+            : "ts-background-color-minus";
+    }
+
+    private string getItemClassAssistantBuy()
+    {
+        var itemClass = getItemClass("btn-plus", isButton: true);
+
+        return TradingPosition.TradingPositionSettings?.AssistantBuyEnabled == true
+         ? $"{itemClass} ts-text-highlighted-a"
+         : $"{itemClass} ts-text-inactive";
+    }
+
+    private string getItemClassAssistantSell()
+    {
+        var itemClass = getItemClass("btn-minus", isButton: true);
+
+        return TradingPosition.TradingPositionSettings?.AssistantSellEnabled == true
+         ? $"{itemClass} ts-text-highlighted-a"
+         : $"{itemClass} ts-text-inactive";
+    }
+
+    private string getItemClassTradingBotEnabled()
+    {
+        var itemClass = getItemClass("trading-bot-enabled", isButton: true);
+
+        return TradingPosition.TradingPositionSettings?.TradingBotEnabled == true
+         ? $"{itemClass} ts-text-highlighted-b"
+         : $"{itemClass} ts-text-inactive";
+    }
+
+    private string getItemClassEmaCrossLogicOpen()
+    {
+        var itemClass = getItemClass("ema-cross-logic-open", isButton: false);
+
+        return TradingPosition.TradingPositionSettings?.EmaCrossLogicOpen == true
+         ? $"{itemClass} ts-text-highlighted-c"
+         : $"{itemClass} ts-text-inactive";
+    }
+
+    private string getItemClassEmaCrossLogicClose()
+    {
+        var itemClass = getItemClass("ema-cross-logic-close", isButton: false);
+
+        return TradingPosition.TradingPositionSettings?.EmaCrossLogicClose == true
+         ? $"{itemClass} ts-text-highlighted-c"
+         : $"{itemClass} ts-text-inactive";
+    }
+}

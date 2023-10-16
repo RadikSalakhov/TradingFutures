@@ -1,0 +1,46 @@
+﻿@using TradingFutures.Client.Abstraction;
+@using TradingFutures.Client.Services;
+@using TradingFutures.Shared.Data;
+@using TradingFutures.Shared.Entities;
+
+@implements IDisposable
+
+@inject IClientSettingsService ClientSettings
+
+<div class="ts-container">
+    <div class="ts-item-current ts-cursor-pointer">
+        <InputSelect @bind-Value=@CurrentTradingProfileIdBind>
+            @foreach (var tradingProfileId in TradingProfileId.GetAll())
+            {
+                <option value="@tradingProfileId">@tradingProfileId</option>
+            }
+        </InputSelect>
+    </div>   
+</div>
+
+@code {
+    private string CurrentTradingProfileIdBind
+    {
+        get => ClientSettings.CurrentTradingProfile.Value;
+        set => ClientSettings.CurrentTradingProfile.Set(value != null ? new TradingProfileId(value) : TradingProfileId._EMPTY);
+    }    
+
+    private IEnumerable<TradingProfileId> TradingProfileIds => TradingProfileId.GetAll();
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ClientSettings.Updated += clientSettings_Updated;
+    }
+
+    public void Dispose()
+    {
+        ClientSettings.Updated -= clientSettings_Updated;
+    }
+
+    private async Task clientSettings_Updated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }   
+}
